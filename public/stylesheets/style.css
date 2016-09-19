@@ -6,3 +6,13 @@ body {
 a {
   color: #00B7FF;
 }
+
+.cell {
+	position: absolute;
+	display: inline-block;
+	border: 1px solid black;
+}
+
+#board {
+	position: relative;
+}
