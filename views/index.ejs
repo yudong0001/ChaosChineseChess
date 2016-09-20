@@ -1,22 +1,90 @@
 <!DOCTYPE html>
+<%
+var rowsCount = 5;
+var columnsCount = 9;
+var cellSize = 50;
+%>
 <html>
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var rowsCount = <%=rowsCount%>;
+            var columnsCount = <%=columnsCount%>;
+            var cellSize = <%=cellSize%>;
+            console.log(rowsCount, columnsCount);
+
+            function randomInt(upLimit) {
+                return Math.round(Math.random() * 100) % 2;
+            }
+
+            var piecesDesc = {
+                '车': 2, '马': 2, '相': 2, '士': 2,
+                '炮': 2, '将': 1, '兵': 5
+            };
+            var availablePieces = [];
+            function createPiece(camp, name, count) {
+                for (var i = 0; i < count; i++) {
+                    availablePieces.push({camp: camp, name: name});
+                }
+            }
+            function createPiecesFor(camp) {
+                Object.keys(piecesDesc).forEach(function(o){
+                    createPiece(camp, o, piecesDesc[o]);
+                });
+            }
+            createPiecesFor('red');
+            createPiecesFor('black');
+
+            function popAPiece() {
+                if (availablePieces.length > 0) {
+                    return availablePieces.splice(randomInt(availablePieces.length), 1)[0];
+                } else {
+                    return '空';
+                }
+            }
+
+            var board = [];
+            var emptyColumn = Math.floor(columnsCount / 2);
+            var emptyRow = rowsCount - 1;
+            for (var i = 0; i < rowsCount; i++) {
+                board.push([]);
+                if (i == emptyRow) {
+                    for (var j = 0; j < columnsCount; j++) {
+                        board[i].push('空');
+                    }
+                } else {
+
+                    for (var j = 0; j < columnsCount; j++) {
+                        if (j == emptyColumn) {
+                            board[i].push('空');
+                        } else {
+                            board[i].push(popAPiece());
+                        }
+                    }
+                }
+            }
+
+            $('.cell').click(function(e){
+                var clicked = $(e.currentTarget);
+                var x = clicked.css('left');
+                var y = clicked.css('top');
+                x = x.substring(0, x.length - 2) / cellSize;
+                y = y.substring(0, y.length - 2) / cellSize;
+                console.log(x, y, board[y][x]);
+            });
+        });
+    </script>
   </head>
   <body>
     <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-	<%
-	var rowsCount = 5;
-	var columnsCount = 9;
-	var cellSize = 50;
-	%>
+    <p>欢迎赏玩<%= title %></p>
 	<div id="board">
 	<% for (var i = 0; i < rowsCount; i++) { %>
 		<% for (var j = 0; j < columnsCount; j++) { %>
-			<div class="cell"
-				style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;"><%= title %>
+			<div class="cell" style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;">
 			</div>
 		<% } %>
 		<br>
