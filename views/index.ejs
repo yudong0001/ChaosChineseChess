@@ -14,19 +14,27 @@ var cellSize = 50;
             var rowsCount = <%=rowsCount%>;
             var columnsCount = <%=columnsCount%>;
             var cellSize = <%=cellSize%>;
-            console.log(rowsCount, columnsCount);
+
+            function Cross() {
+                //TODO =======
+            }
 
             function randomInt(upLimit) {
                 return Math.round(Math.random() * 100) % upLimit;
             }
 
             var piecesDesc = {
-                '车': 2, '马': 2, '相': 2, '士': 2,
-                '炮': 2, '将': 1, '兵': 5
+                '车': {count:2},
+                '马': {count:2},
+                '相': {count:2},
+                '士': {count:2},
+                '炮': {count:2},
+                '将': {count:1},
+                '兵': {count:5}
             };
             var availablePieces = [];
-            function createPiece(camp, name, count) {
-                for (var i = 0; i < count; i++) {
+            function createPiece(camp, name, desc) {
+                for (var i = 0; i < desc.count; i++) {
                     availablePieces.push({camp: camp, name: name, hidden:true});
                 }
             }
@@ -38,7 +46,7 @@ var cellSize = 50;
             createPiecesFor('red');
             createPiecesFor('black');
 
-            function popAPiece() {
+            function popAPieceTo(x, y) {
                 if (availablePieces.length > 0) {
                     if (availablePieces.length == 1) {
                         return availablePieces[0];
@@ -65,7 +73,7 @@ var cellSize = 50;
                         if (j == emptyColumn) {
                             board[i].push('空');
                         } else {
-                            board[i].push(popAPiece());
+                            board[i].push(popAPieceTo(j, i));
                         }
                     }
                 }
@@ -73,10 +81,11 @@ var cellSize = 50;
 
             var aiPlayer = {
                 play: function() {
-
+                    console.log('电脑假装走了一步。');
                 },
             };
             var humanPlayer = {
+                selectedAlly: undefined,
                 play: function(e) {
                     var clicked = $(e.currentTarget);
                     var x = clicked.css('left');
@@ -84,21 +93,37 @@ var cellSize = 50;
                     x = x.substring(0, x.length - 2) / cellSize;
                     y = y.substring(0, y.length - 2) / cellSize;
                     var cell = board[y][x];
-                    console.log(cell);
                     if (cell == '空') {
-                        console.log('空地，当随便点一点好了。');
                         clicked.addClass('discovered');
+                        if (humanPlayer.selectedAlly == undefined) {
+                            console.log('空地，只能点一点。');
+
+                        } else {
+                            console.log('空地，进一步判断能不能走。');
+
+                        }
                     } else {
                         if (cell.hidden) {
+                            console.log('翻开一颗 ' + cell.camp + ' 棋子。');
+
                             cell.hidden = false;
                             clicked.addClass('discovered ' + cell.camp).text(cell.name);
-                            console.log('翻开一颗 ' + cell.camp + ' 棋子。');
+                            aiPlayer.play();
                         } else {
                             if (cell.camp == 'red') {
-                                clicked.addClass('selected');
                                 console.log('选中一颗己方棋子。');
+
+                                $('.cell').removeClass('selected');
+                                clicked.addClass('selected');
+                                humanPlayer.selectedAlly = clicked;
                             } else {
-                                console.log('敌方棋子，必须在 isAllySelected 为 true 时方可进一步判断。');
+                                if (humanPlayer.selectedAlly == undefined) {
+                                    console.log('敌方棋子，你只能点一点。');
+
+                                } else {
+                                    console.log('敌方棋子，需要判断能不能吃。');
+
+                                }
                             }
                         }
                     }
