@@ -17,7 +17,7 @@ var cellSize = 50;
             console.log(rowsCount, columnsCount);
 
             function randomInt(upLimit) {
-                return Math.round(Math.random() * 100) % 2;
+                return Math.round(Math.random() * 100) % upLimit;
             }
 
             var piecesDesc = {
@@ -27,7 +27,7 @@ var cellSize = 50;
             var availablePieces = [];
             function createPiece(camp, name, count) {
                 for (var i = 0; i < count; i++) {
-                    availablePieces.push({camp: camp, name: name});
+                    availablePieces.push({camp: camp, name: name, hidden:true});
                 }
             }
             function createPiecesFor(camp) {
@@ -40,7 +40,11 @@ var cellSize = 50;
 
             function popAPiece() {
                 if (availablePieces.length > 0) {
-                    return availablePieces.splice(randomInt(availablePieces.length), 1)[0];
+                    if (availablePieces.length == 1) {
+                        return availablePieces[0];
+                    } else {
+                        return availablePieces.splice(randomInt(availablePieces.length), 1)[0];
+                    }
                 } else {
                     return '空';
                 }
@@ -67,14 +71,41 @@ var cellSize = 50;
                 }
             }
 
-            $('.cell').click(function(e){
-                var clicked = $(e.currentTarget);
-                var x = clicked.css('left');
-                var y = clicked.css('top');
-                x = x.substring(0, x.length - 2) / cellSize;
-                y = y.substring(0, y.length - 2) / cellSize;
-                console.log(x, y, board[y][x]);
-            });
+            var aiPlayer = {
+                play: function() {
+
+                },
+            };
+            var humanPlayer = {
+                play: function(e) {
+                    var clicked = $(e.currentTarget);
+                    var x = clicked.css('left');
+                    var y = clicked.css('top');
+                    x = x.substring(0, x.length - 2) / cellSize;
+                    y = y.substring(0, y.length - 2) / cellSize;
+                    var cell = board[y][x];
+                    console.log(cell);
+                    if (cell == '空') {
+                        console.log('空地，当随便点一点好了。');
+                        clicked.addClass('discovered');
+                    } else {
+                        if (cell.hidden) {
+                            cell.hidden = false;
+                            clicked.addClass('discovered ' + cell.camp).text(cell.name);
+                            console.log('翻开一颗 ' + cell.camp + ' 棋子。');
+                        } else {
+                            if (cell.camp == 'red') {
+                                clicked.addClass('selected');
+                                console.log('选中一颗己方棋子。');
+                            } else {
+                                console.log('敌方棋子，必须在 isAllySelected 为 true 时方可进一步判断。');
+                            }
+                        }
+                    }
+                },
+            };
+
+            $('.cell').click(humanPlayer.play);
         });
     </script>
   </head>
