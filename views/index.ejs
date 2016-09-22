@@ -14,9 +14,23 @@ var cellSize = 50;
             var rowsCount = <%=rowsCount%>;
             var columnsCount = <%=columnsCount%>;
             var cellSize = <%=cellSize%>;
+            var board = [];
 
-            function Cross() {
-                //TODO =======
+            function Piece(name, camp, x, y, cbMoveTo) {
+                this.name = name;
+                this.camp = camp;
+                this.x = x;
+                this.y = y;
+                this.hidden = true;
+                this.tryMoveTo = cbMoveTo;
+
+                this.doMoveTo = function(anotherPiece) {
+                    //TODO =======
+                };
+            }
+
+            function createEmptyPieceAt(x, y) {
+                return new Piece('空', undefined, x, y, undefined);
             }
 
             function randomInt(upLimit) {
@@ -24,18 +38,58 @@ var cellSize = 50;
             }
 
             var piecesDesc = {
-                '车': {count:2},
-                '马': {count:2},
-                '相': {count:2},
-                '士': {count:2},
-                '炮': {count:2},
-                '将': {count:1},
-                '兵': {count:5}
+                '车': {count:2, cbMoveTo:function(piece){
+                    console.log('对不起，现在哪里都走不了。');
+
+                    if (this.x == piece.x && this.y != piece.y) {
+                        var upLimit = this.y;
+                        var lowLimit = piece.y;
+                        if (upLimit < lowLimit) {
+                            uplimit = piece.y;
+                            lowLimit = this.y;
+                        }
+                        for (var i = lowLimit + 1; i < upLimit; i++) {
+                            if (board[this.y][i].name != '空') {
+                                return false;
+                            }
+                        }
+
+                        this.doMoveTo(piece);
+                        return true;
+                    } else if ((this.x != piece.x && this.y == piece.y)) {
+
+                    }
+                    return false;
+                 }},
+                '马': {count:2, cbMoveTo:function(piece){
+                    console.log('对不起，现在哪里都走不了。');
+                    return false;
+                }},
+                '相': {count:2, cbMoveTo:function(piece){
+                    console.log('对不起，现在哪里都走不了。');
+                    return false;
+                }},
+                '士': {count:2, cbMoveTo:function(piece){
+                    console.log('对不起，现在哪里都走不了。');
+                    return false;
+                }},
+                '炮': {count:2, cbMoveTo:function(piece){
+                    console.log('对不起，现在哪里都走不了。');
+                    return false;
+                }},
+                '将': {count:1, cbMoveTo:function(piece){
+                    console.log('对不起，现在哪里都走不了。');
+                    return false;
+                }},
+                '兵': {count:5, cbMoveTo:function(piece){
+                    console.log('对不起，现在哪里都走不了。');
+                    return false;
+                }}
             };
             var availablePieces = [];
             function createPiece(camp, name, desc) {
                 for (var i = 0; i < desc.count; i++) {
-                    availablePieces.push({camp: camp, name: name, hidden:true});
+                    availablePieces.push({camp: camp, name: name, cb: desc.cbMoveTo});
                 }
             }
             function createPiecesFor(camp) {
@@ -48,30 +102,31 @@ var cellSize = 50;
 
             function popAPieceTo(x, y) {
                 if (availablePieces.length > 0) {
+                    var piece = undefined;
                     if (availablePieces.length == 1) {
-                        return availablePieces[0];
+                        piece = availablePieces[0];
                     } else {
-                        return availablePieces.splice(randomInt(availablePieces.length), 1)[0];
+                        piece = availablePieces.splice(randomInt(availablePieces.length), 1)[0];
                     }
+                    return new Piece(piece.name, piece.camp, x, y, piece.cb);
                 } else {
-                    return '空';
+                    return createEmptyPieceAt(x, y);
                 }
             }
 
-            var board = [];
             var emptyColumn = Math.floor(columnsCount / 2);
             var emptyRow = rowsCount - 1;
             for (var i = 0; i < rowsCount; i++) {
                 board.push([]);
                 if (i == emptyRow) {
                     for (var j = 0; j < columnsCount; j++) {
-                        board[i].push('空');
+                        board[i].push(createEmptyPieceAt(j, i));
                     }
                 } else {
 
                     for (var j = 0; j < columnsCount; j++) {
                         if (j == emptyColumn) {
-                            board[i].push('空');
+                            board[i].push(createEmptyPieceAt(j, i));
                         } else {
                             board[i].push(popAPieceTo(j, i));
                         }
@@ -93,14 +148,18 @@ var cellSize = 50;
                     x = x.substring(0, x.length - 2) / cellSize;
                     y = y.substring(0, y.length - 2) / cellSize;
                     var cell = board[y][x];
-                    if (cell == '空') {
+                    if (cell.name == '空') {
                         clicked.addClass('discovered');
-                        if (humanPlayer.selectedAlly == undefined) {
+                        if (this.selectedAlly == undefined) {
                             console.log('空地，只能点一点。');
 
                         } else {
-                            console.log('空地，进一步判断能不能走。');
+                            if (this.selectedAlly.tryMoveTo(cell)) {
+                                this.selectedAlly = undefined;
+                            } else {
+                                console.log('不能这么走，你要去学一学中国象棋基本规则。');
 
+                            }
                         }
                     } else {
                         if (cell.hidden) {
@@ -115,14 +174,18 @@ var cellSize = 50;
 
                                 $('.cell').removeClass('selected');
                                 clicked.addClass('selected');
-                                humanPlayer.selectedAlly = clicked;
+                                this.selectedAlly = cell;
                             } else {
-                                if (humanPlayer.selectedAlly == undefined) {
+                                if (this.selectedAlly == undefined) {
                                     console.log('敌方棋子，你只能点一点。');
 
                                 } else {
-                                    console.log('敌方棋子，需要判断能不能吃。');
+                                    if (this.selectedAlly.tryMoveTo(cell)) {
+                                        this.selectedAlly = undefined;
+                                    } else {
+                                        console.log('不能这么走，你要去学一学中国象棋基本规则。');
 
+                                    }
                                 }
                             }
                         }
@@ -130,7 +193,9 @@ var cellSize = 50;
                 },
             };
 
-            $('.cell').click(humanPlayer.play);
+            $('.cell').click(function(e){
+                humanPlayer.play(e);
+            });
         });
     </script>
   </head>
