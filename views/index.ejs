@@ -11,10 +11,13 @@ var cellSize = 50;
     <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
+            var EMPTY_NAME = '空';
+
             var rowsCount = <%=rowsCount%>;
             var columnsCount = <%=columnsCount%>;
             var cellSize = <%=cellSize%>;
             var board = [];
+            var deadPieces = [];
 
             function Piece(name, camp, x, y, cbMoveTo) {
                 this.name = name;
@@ -24,13 +27,27 @@ var cellSize = 50;
                 this.hidden = true;
                 this.tryMoveTo = cbMoveTo;
 
+                function replaceTarget(target) {
+                    target.name = this.name;
+                    target.camp = this.camp;
+                    this.name = EMPTY_NAME;
+                    this.camp = undefined;
+                }
+
                 this.doMoveTo = function(anotherPiece) {
-                    //TODO =======
+                    console.log('吼吼，走了一步。');
+                    if (anotherPiece.name == EMPTY_NAME) {
+                        replaceTarget(anotherPiece);
+                    }else {
+                        deadPieces.push(Piece(anotherPiece.name, anotherPiece.camp,
+                            anotherPiece.x, anotherPiece.y, anotherPiece.cbMoveTo));
+                        replaceTarget(anotherPiece);
+                    }
                 };
             }
 
             function createEmptyPieceAt(x, y) {
-                return new Piece('空', undefined, x, y, undefined);
+                return new Piece(EMPTY_NAME, undefined, x, y, undefined);
             }
 
             function randomInt(upLimit) {
@@ -39,8 +56,6 @@ var cellSize = 50;
 
             var piecesDesc = {
                 '车': {count:2, cbMoveTo:function(piece){
-                    console.log('对不起，现在哪里都走不了。');
-
                     if (this.x == piece.x && this.y != piece.y) {
                         var upLimit = this.y;
                         var lowLimit = piece.y;
@@ -49,7 +64,7 @@ var cellSize = 50;
                             lowLimit = this.y;
                         }
                         for (var i = lowLimit + 1; i < upLimit; i++) {
-                            if (board[this.y][i].name != '空') {
+                            if (board[this.y][i].name != EMPTY_NAME) {
                                 return false;
                             }
                         }
@@ -57,7 +72,20 @@ var cellSize = 50;
                         this.doMoveTo(piece);
                         return true;
                     } else if ((this.x != piece.x && this.y == piece.y)) {
+                        var upLimit = this.x;
+                        var lowLimit = piece.x;
+                        if (upLimit < lowLimit) {
+                            uplimit = piece.x;
+                            lowLimit = this.x;
+                        }
+                        for (var i = lowLimit + 1; i < upLimit; i++) {
+                            if (board[i][this.x].name != EMPTY_NAME) {
+                                return false;
+                            }
+                        }
 
+                        this.doMoveTo(piece);
+                        return true;
                     }
                     return false;
                  }},
@@ -148,7 +176,7 @@ var cellSize = 50;
                     x = x.substring(0, x.length - 2) / cellSize;
                     y = y.substring(0, y.length - 2) / cellSize;
                     var cell = board[y][x];
-                    if (cell.name == '空') {
+                    if (cell.name == EMPTY_NAME) {
                         clicked.addClass('discovered');
                         if (this.selectedAlly == undefined) {
                             console.log('空地，只能点一点。');
