@@ -27,27 +27,33 @@ var cellSize = 50;
                 this.hidden = true;
                 this.tryMoveTo = cbMoveTo;
 
-                function replaceTarget(target) {
-                    target.name = this.name;
-                    target.camp = this.camp;
-                    this.name = EMPTY_NAME;
-                    this.camp = undefined;
+                function replaceTarget(target, source) {
+                    var cb = target.tryMoveTo;
+                    target.name = source.name;
+                    target.camp = source.camp;
+                    target.tryMoveTo = source.tryMoveTo;
+
+                    source.name = EMPTY_NAME;
+                    source.camp = undefined;
+                    source.tryMoveTo = undefined;
                 }
 
                 this.doMoveTo = function(anotherPiece) {
                     console.log('吼吼，走了一步。');
                     if (anotherPiece.name == EMPTY_NAME) {
-                        replaceTarget(anotherPiece);
+                        replaceTarget(anotherPiece, this);
                     }else {
                         deadPieces.push(Piece(anotherPiece.name, anotherPiece.camp,
                             anotherPiece.x, anotherPiece.y, anotherPiece.cbMoveTo));
-                        replaceTarget(anotherPiece);
+                        replaceTarget(anotherPiece, this);
                     }
                 };
             }
 
             function createEmptyPieceAt(x, y) {
-                return new Piece(EMPTY_NAME, undefined, x, y, undefined);
+                var p = new Piece(EMPTY_NAME, undefined, x, y, undefined);
+                p.hidden = false;
+                return p;
             }
 
             function randomInt(upLimit) {
@@ -60,11 +66,11 @@ var cellSize = 50;
                         var upLimit = this.y;
                         var lowLimit = piece.y;
                         if (upLimit < lowLimit) {
-                            uplimit = piece.y;
+                            upLimit = piece.y;
                             lowLimit = this.y;
                         }
                         for (var i = lowLimit + 1; i < upLimit; i++) {
-                            if (board[this.y][i].name != EMPTY_NAME) {
+                            if (board[i][this.x].name != EMPTY_NAME) {
                                 return false;
                             }
                         }
@@ -75,11 +81,11 @@ var cellSize = 50;
                         var upLimit = this.x;
                         var lowLimit = piece.x;
                         if (upLimit < lowLimit) {
-                            uplimit = piece.x;
+                            upLimit = piece.x;
                             lowLimit = this.x;
                         }
                         for (var i = lowLimit + 1; i < upLimit; i++) {
-                            if (board[i][this.x].name != EMPTY_NAME) {
+                            if (board[this.y][i].name != EMPTY_NAME) {
                                 return false;
                             }
                         }
@@ -167,23 +173,55 @@ var cellSize = 50;
                     console.log('电脑假装走了一步。');
                 },
             };
+            function getCellFromMami(jqMami) {
+                var x = jqMami.css('left');
+                var y = jqMami.css('top');
+                x = x.substring(0, x.length - 2) / cellSize;
+                y = y.substring(0, y.length - 2) / cellSize;
+                return board[y][x];
+            }
+            function updateMamiForCell(jqMami, cell) {
+                if (cell.hidden) {
+                    return;
+                } else {
+                    jqMami.addClass('discovered');
+                }
+                if (cell.name == EMPTY_NAME) {
+                    jqMami.removeClass('red discovered selected').addClass('discovered').text('');
+                } else {
+                    jqMami.removeClass('red black').text(cell.name);
+                    if (cell.camp == 'red') {
+                        jqMami.addClass('red');
+                    } else {
+                        jqMami.addClass('black');
+                    }
+                }
+            }
             var humanPlayer = {
                 selectedAlly: undefined,
                 play: function(e) {
                     var clicked = $(e.currentTarget);
-                    var x = clicked.css('left');
-                    var y = clicked.css('top');
-                    x = x.substring(0, x.length - 2) / cellSize;
-                    y = y.substring(0, y.length - 2) / cellSize;
-                    var cell = board[y][x];
+                    var cell = getCellFromMami(clicked);
+
+                    console.log('TODO：现在已有选中棋子时，点击未翻开的棋子会翻开棋子，行为不对。');
+                    if (this.selectedAlly == undefined) {
+
+                    } else {
+
+                    }
+
                     if (cell.name == EMPTY_NAME) {
                         clicked.addClass('discovered');
                         if (this.selectedAlly == undefined) {
                             console.log('空地，只能点一点。');
 
                         } else {
-                            if (this.selectedAlly.tryMoveTo(cell)) {
+                            var selected = getCellFromMami(this.selectedAlly);
+                            if (selected.tryMoveTo(cell)) {
+                                updateMamiForCell(this.selectedAlly, selected);
+                                updateMamiForCell(clicked, cell);
                                 this.selectedAlly = undefined;
+                                aiPlayer.play();
                             } else {
                                 console.log('不能这么走，你要去学一学中国象棋基本规则。');
 
@@ -202,14 +240,18 @@ var cellSize = 50;
 
                                 $('.cell').removeClass('selected');
                                 clicked.addClass('selected');
-                                this.selectedAlly = cell;
+                                this.selectedAlly = clicked;
                             } else {
                                 if (this.selectedAlly == undefined) {
                                     console.log('敌方棋子，你只能点一点。');
 
                                 } else {
-                                    if (this.selectedAlly.tryMoveTo(cell)) {
+                                    var selected = getCellFromMami(this.selectedAlly);
+                                    if (selected.tryMoveTo(cell)) {
+                                        updateMamiForCell(this.selectedAlly, selected);
+                                        updateMamiForCell(clicked, cell);
                                         this.selectedAlly = undefined;
+                                        aiPlayer.play();
                                     } else {
                                         console.log('不能这么走，你要去学一学中国象棋基本规则。');
 
@@ -223,6 +265,10 @@ var cellSize = 50;
 
             $('.cell').click(function(e){
                 humanPlayer.play(e);
+            });
+            $('.cell').each(function(i, o){
+                var jqMami = $(o);
+                updateMamiForCell(jqMami, getCellFromMami(jqMami));
             });
         });
     </script>
