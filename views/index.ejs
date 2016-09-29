@@ -60,63 +60,111 @@ var cellSize = 50;
                 return Math.round(Math.random() * 100) % upLimit;
             }
 
+            function isInStraightLine(p1, p2) {
+                return (p1.x == p2.x && p1.y != p2.y) || (p1.x != p2.x && p1.y == p2.y);
+            }
+
+            function obstaclesCountOnStraightLine(p1, p2) {
+                var count = 0;
+                if (p1.x == p2.x && p1.y != p2.y) {
+                    var upLimit = p1.y;
+                    var lowLimit = p2.y;
+                    if (upLimit < lowLimit) {
+                        upLimit = p2.y;
+                        lowLimit = p1.y;
+                    }
+                    for (var i = lowLimit + 1; i < upLimit; i++) {
+                        if (board[i][p1.x].name != EMPTY_NAME) {
+                            count++;
+                        }
+                    }
+                } else {
+                    var upLimit = p1.x;
+                    var lowLimit = p2.x;
+                    if (upLimit < lowLimit) {
+                        upLimit = p2.x;
+                        lowLimit = p1.x;
+                    }
+                    for (var i = lowLimit + 1; i < upLimit; i++) {
+                        if (board[p1.y][i].name != EMPTY_NAME) {
+                            count++;
+                        }
+                    }
+                }
+                return count;
+            }
+
             var piecesDesc = {
                 '车': {count:2, cbMoveTo:function(piece){
-                    if (this.x == piece.x && this.y != piece.y) {
-                        var upLimit = this.y;
-                        var lowLimit = piece.y;
-                        if (upLimit < lowLimit) {
-                            upLimit = piece.y;
-                            lowLimit = this.y;
+                    if (isInStraightLine(this, piece)) {
+                        if (obstaclesCountOnStraightLine(this, piece) == 0) {
+                            this.doMoveTo(piece);
+                            return true;
                         }
-                        for (var i = lowLimit + 1; i < upLimit; i++) {
-                            if (board[i][this.x].name != EMPTY_NAME) {
-                                return false;
-                            }
-                        }
-
-                        this.doMoveTo(piece);
-                        return true;
-                    } else if ((this.x != piece.x && this.y == piece.y)) {
-                        var upLimit = this.x;
-                        var lowLimit = piece.x;
-                        if (upLimit < lowLimit) {
-                            upLimit = piece.x;
-                            lowLimit = this.x;
-                        }
-                        for (var i = lowLimit + 1; i < upLimit; i++) {
-                            if (board[this.y][i].name != EMPTY_NAME) {
-                                return false;
-                            }
-                        }
-
-                        this.doMoveTo(piece);
-                        return true;
                     }
                     return false;
                  }},
                 '马': {count:2, cbMoveTo:function(piece){
-                    console.log('对不起，现在哪里都走不了。');
+                    if(Math.abs(this.x - piece.x) == 1 && Math.abs(this.y - piece.y) == 2) {
+                        if (board[(this.y + piece.y) / 2][this.x].name == EMPTY_NAME) {
+                            this.doMoveTo(piece);
+                            return true;
+                        }
+                    } else if(Math.abs(this.x - piece.x) == 2 && Math.abs(this.y - piece.y) == 1) {
+                        if (board[this.y][(this.x + piece.x) / 2].name == EMPTY_NAME) {
+                            this.doMoveTo(piece);
+                            return true;
+                        }
+                    }
                     return false;
                 }},
                 '相': {count:2, cbMoveTo:function(piece){
-                    console.log('对不起，现在哪里都走不了。');
+                    if(Math.abs(this.x - piece.x) == 2 && Math.abs(this.y - piece.y) == 2) {
+                        if (board[(this.y + piece.y) / 2][(this.x + piece.x) / 2].name == EMPTY_NAME) {
+                            this.doMoveTo(piece);
+                            return true;
+                        }
+                    }
                     return false;
                 }},
                 '士': {count:2, cbMoveTo:function(piece){
-                    console.log('对不起，现在哪里都走不了。');
+                    if (Math.abs(this.x - piece.x) == 1 && Math.abs(this.y - piece.y) == 1) {
+                        this.doMoveTo(piece);
+                        return true;
+                    }
                     return false;
                 }},
                 '炮': {count:2, cbMoveTo:function(piece){
-                    console.log('对不起，现在哪里都走不了。');
+                    if (isInStraightLine(this, piece)) {
+                        var count = obstaclesCountOnStraightLine(this, piece);
+                        if (piece.camp == undefined) {
+                            if (count == 0) {
+                                this.doMoveTo(piece);
+                                return true;
+                            }
+                        } else if (count == 1) {
+                            this.doMoveTo(piece);
+                            return true;
+                        }
+                    }
                     return false;
                 }},
                 '将': {count:1, cbMoveTo:function(piece){
-                    console.log('对不起，现在哪里都走不了。');
+                    var dx = Math.abs(this.x - piece.x);
+                    var dy = Math.abs(this.y - piece.y);
+                    if ((dx == 1 && (dy == 1 || dy == 0)) || (dx == 0 && dy == 1)) {
+                        this.doMoveTo(piece);
+                        return true;
+                    }
                     return false;
                 }},
                 '兵': {count:5, cbMoveTo:function(piece){
-                    console.log('对不起，现在哪里都走不了。');
+                    var dx = Math.abs(this.x - piece.x);
+                    var dy = Math.abs(this.y - piece.y);
+                    if ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) {
+                        this.doMoveTo(piece);
+                        return true;
+                    }
                     return false;
                 }}
             };
@@ -199,64 +247,67 @@ var cellSize = 50;
             }
             var humanPlayer = {
                 selectedAlly: undefined,
+                camp: undefined,
+                tryMovePiece: function(targetMami) {
+                    var selected = getCellFromMami(this.selectedAlly);
+                    var targetCell = getCellFromMami(targetMami);
+                    if (selected.tryMoveTo(targetCell)) {
+                        updateMamiForCell(this.selectedAlly, selected);
+                        updateMamiForCell(targetMami, targetCell);
+                        this.selectedAlly = undefined;
+                        aiPlayer.play();
+                    } else {
+                        console.log('不能这么走，你要去学一学中国象棋基本规则。');
+                    }
+                },
                 play: function(e) {
                     var clicked = $(e.currentTarget);
                     var cell = getCellFromMami(clicked);
 
                     console.log('TODO：现在已有选中棋子时，点击未翻开的棋子会翻开棋子，行为不对。');
                     if (this.selectedAlly == undefined) {
-
-                    } else {
-
-                    }
-
-                    if (cell.name == EMPTY_NAME) {
-                        clicked.addClass('discovered');
-                        if (this.selectedAlly == undefined) {
-                            console.log('空地，只能点一点。');
-
+                        if (cell.name == EMPTY_NAME) {
+                            console.log('点击空地。');
                         } else {
-                            var selected = getCellFromMami(this.selectedAlly);
-                            if (selected.tryMoveTo(cell)) {
-                                updateMamiForCell(this.selectedAlly, selected);
-                                updateMamiForCell(clicked, cell);
-                                this.selectedAlly = undefined;
+                            if (cell.hidden) {
+                                console.log('翻开一颗 ' + cell.camp + ' 棋子。');
+
+                                if (this.camp == undefined) {
+                                    this.camp = cell.camp;
+                                }
+                                cell.hidden = false;
+                                clicked.addClass('discovered ' + cell.camp).text(cell.name);
                                 aiPlayer.play();
                             } else {
-                                console.log('不能这么走，你要去学一学中国象棋基本规则。');
-
+                                if (this.camp == cell.camp) {
+                                    console.log('选择一颗己方 ' + cell.camp + ' 棋子。');
+                                    clicked.addClass('selected');
+                                    this.selectedAlly = clicked;
+                                } else {
+                                    console.log('敌方棋子，无法选择。');
+                                }
                             }
                         }
                     } else {
-                        if (cell.hidden) {
-                            console.log('翻开一颗 ' + cell.camp + ' 棋子。');
-
-                            cell.hidden = false;
-                            clicked.addClass('discovered ' + cell.camp).text(cell.name);
-                            aiPlayer.play();
+                        if (cell.name == EMPTY_NAME) {
+                            this.tryMovePiece(clicked);
                         } else {
-                            if (cell.camp == 'red') {
-                                console.log('选中一颗己方棋子。');
-
+                            if (cell.hidden) {
+                                console.log('要翻开棋子，请取消当前选择的棋子。');
+                                return;
+                            }
+                            if (cell.camp == this.camp) {
                                 $('.cell').removeClass('selected');
-                                clicked.addClass('selected');
-                                this.selectedAlly = clicked;
-                            } else {
-                                if (this.selectedAlly == undefined) {
-                                    console.log('敌方棋子，你只能点一点。');
-
+                                if (this.selectedAlly.get(0) == clicked.get(0)) {
+                                    console.log('取消选择。');
+                                    this.selectedAlly = undefined;
                                 } else {
-                                    var selected = getCellFromMami(this.selectedAlly);
-                                    if (selected.tryMoveTo(cell)) {
-                                        updateMamiForCell(this.selectedAlly, selected);
-                                        updateMamiForCell(clicked, cell);
-                                        this.selectedAlly = undefined;
-                                        aiPlayer.play();
-                                    } else {
-                                        console.log('不能这么走，你要去学一学中国象棋基本规则。');
-
-                                    }
+                                    console.log('切换选择。');
+                                    clicked.addClass('selected');
+                                    this.selectedAlly = clicked;
                                 }
+                            } else {
+                                this.tryMovePiece(clicked);
                             }
                         }
                     }
