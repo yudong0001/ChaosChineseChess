@@ -13,6 +13,20 @@ var cellSize = 50;
         $(document).ready(function(){
             var EMPTY_NAME = '空';
 
+            var camper = {
+                RED: 'red',
+                BLACK: 'black',
+                assignCamp: function (firstCamp, player1, player2) {
+                    if (firstCamp == this.RED) {
+                        player1.camp = firstCamp;
+                        player2.camp = this.BLACK;
+                    } else if (firstCamp == this.BLACK) {
+                        player1.camp = firstCamp;
+                        player2.camp = this.RED;
+                    }
+                }
+            }
+
             var rowsCount = <%=rowsCount%>;
             var columnsCount = <%=columnsCount%>;
             var cellSize = <%=cellSize%>;
@@ -25,20 +39,19 @@ var cellSize = 50;
                 this.x = x;
                 this.y = y;
                 this.hidden = true;
-                this.tryMoveTo = cbMoveTo;
+                this.canMoveTo = cbMoveTo;
 
                 function replaceTarget(target, source) {
-                    var cb = target.tryMoveTo;
                     target.name = source.name;
                     target.camp = source.camp;
-                    target.tryMoveTo = source.tryMoveTo;
+                    target.canMoveTo = source.canMoveTo;
 
                     source.name = EMPTY_NAME;
                     source.camp = undefined;
-                    source.tryMoveTo = undefined;
+                    source.canMoveTo = undefined;
                 }
 
-                this.doMoveTo = function(anotherPiece) {
+                this.moveTo = function(anotherPiece) {
                     console.log('吼吼，走了一步。');
                     if (anotherPiece.name == EMPTY_NAME) {
                         replaceTarget(anotherPiece, this);
@@ -96,76 +109,37 @@ var cellSize = 50;
 
             var piecesDesc = {
                 '车': {count:2, cbMoveTo:function(piece){
-                    if (isInStraightLine(this, piece)) {
-                        if (obstaclesCountOnStraightLine(this, piece) == 0) {
-                            this.doMoveTo(piece);
-                            return true;
-                        }
-                    }
-                    return false;
+                    return isInStraightLine(this, piece) && obstaclesCountOnStraightLine(this, piece) == 0;
                  }},
                 '马': {count:2, cbMoveTo:function(piece){
-                    if(Math.abs(this.x - piece.x) == 1 && Math.abs(this.y - piece.y) == 2) {
-                        if (board[(this.y + piece.y) / 2][this.x].name == EMPTY_NAME) {
-                            this.doMoveTo(piece);
-                            return true;
-                        }
-                    } else if(Math.abs(this.x - piece.x) == 2 && Math.abs(this.y - piece.y) == 1) {
-                        if (board[this.y][(this.x + piece.x) / 2].name == EMPTY_NAME) {
-                            this.doMoveTo(piece);
-                            return true;
-                        }
-                    }
-                    return false;
+                    var dx = Math.abs(this.x - piece.x);
+                    var dy = Math.abs(this.y - piece.y);
+                    return (dx == 1 && dy == 2 && board[(this.y + piece.y) / 2][this.x].name == EMPTY_NAME) ||
+                        (dx == 2 && dy == 1 && board[this.y][(this.x + piece.x) / 2].name == EMPTY_NAME);
                 }},
                 '相': {count:2, cbMoveTo:function(piece){
-                    if(Math.abs(this.x - piece.x) == 2 && Math.abs(this.y - piece.y) == 2) {
-                        if (board[(this.y + piece.y) / 2][(this.x + piece.x) / 2].name == EMPTY_NAME) {
-                            this.doMoveTo(piece);
-                            return true;
-                        }
-                    }
-                    return false;
+                    return Math.abs(this.x - piece.x) == 2 && Math.abs(this.y - piece.y) == 2 &&
+                        board[(this.y + piece.y) / 2][(this.x + piece.x) / 2].name == EMPTY_NAME;
                 }},
                 '士': {count:2, cbMoveTo:function(piece){
-                    if (Math.abs(this.x - piece.x) == 1 && Math.abs(this.y - piece.y) == 1) {
-                        this.doMoveTo(piece);
-                        return true;
-                    }
-                    return false;
+                    return Math.abs(this.x - piece.x) == 1 && Math.abs(this.y - piece.y) == 1;
                 }},
                 '炮': {count:2, cbMoveTo:function(piece){
                     if (isInStraightLine(this, piece)) {
                         var count = obstaclesCountOnStraightLine(this, piece);
-                        if (piece.camp == undefined) {
-                            if (count == 0) {
-                                this.doMoveTo(piece);
-                                return true;
-                            }
-                        } else if (count == 1) {
-                            this.doMoveTo(piece);
-                            return true;
-                        }
+                        return (piece.camp == undefined && count == 0) || count == 1;
                     }
                     return false;
                 }},
                 '将': {count:1, cbMoveTo:function(piece){
                     var dx = Math.abs(this.x - piece.x);
                     var dy = Math.abs(this.y - piece.y);
-                    if ((dx == 1 && (dy == 1 || dy == 0)) || (dx == 0 && dy == 1)) {
-                        this.doMoveTo(piece);
-                        return true;
-                    }
-                    return false;
+                    return (dx == 1 && (dy == 1 || dy == 0)) || (dx == 0 && dy == 1);
                 }},
                 '兵': {count:5, cbMoveTo:function(piece){
                     var dx = Math.abs(this.x - piece.x);
                     var dy = Math.abs(this.y - piece.y);
-                    if ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) {
-                        this.doMoveTo(piece);
-                        return true;
-                    }
-                    return false;
+                    return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
                 }}
             };
             var availablePieces = [];
@@ -179,8 +153,8 @@ var cellSize = 50;
                     createPiece(camp, o, piecesDesc[o]);
                 });
             }
-            createPiecesFor('red');
-            createPiecesFor('black');
+            createPiecesFor(camper.RED);
+            createPiecesFor(camper.BLACK);
 
             function popAPieceTo(x, y) {
                 if (availablePieces.length > 0) {
@@ -216,11 +190,6 @@ var cellSize = 50;
                 }
             }
 
-            var aiPlayer = {
-                play: function() {
-                    console.log('电脑假装走了一步。');
-                },
-            };
             function getCellFromMami(jqMami) {
                 var x = jqMami.css('left');
                 var y = jqMami.css('top');
@@ -228,6 +197,25 @@ var cellSize = 50;
                 y = y.substring(0, y.length - 2) / cellSize;
                 return board[y][x];
             }
+
+            // AIPlayer 的难度依据 AI 是否知晓盘面全局（未翻开的棋子）划分。
+            var aiPlayer = {
+                camp: undefined,
+                testCouldMove: function(pieceMami, targetMami) {
+                    var piece = getCellFromMami(pieceMami);
+                    var target = getCellFromMami(targetMami);
+                    return piece.canMoveTo(targetMami);
+                },
+                play: function() {
+                    console.log('电脑检测有无已翻开的己方棋子并尝试走动。');
+
+                    var candidates = $('.' + this.camp + '.discovered:not(.empty)').get();
+                    console.log('TODO: ', candidates);
+
+                    console.log('走动失败，随机（或有选择的，依据难度不同）翻开棋子。');
+                    console.log('无可用下一步，则检测是否输局或 Pass 一步。');
+                },
+            };
             function updateMamiForCell(jqMami, cell) {
                 if (cell.hidden) {
                     return;
@@ -235,13 +223,13 @@ var cellSize = 50;
                     jqMami.addClass('discovered');
                 }
                 if (cell.name == EMPTY_NAME) {
-                    jqMami.removeClass('red discovered selected').addClass('discovered').text('');
+                    jqMami.removeClass('red discovered selected').addClass('discovered empty').text('');
                 } else {
                     jqMami.removeClass('red black').text(cell.name);
-                    if (cell.camp == 'red') {
-                        jqMami.addClass('red');
+                    if (cell.camp == camper.RED) {
+                        jqMami.addClass(camper.RED);
                     } else {
-                        jqMami.addClass('black');
+                        jqMami.addClass(camper.BLACK);
                     }
                 }
             }
@@ -251,7 +239,8 @@ var cellSize = 50;
                 tryMovePiece: function(targetMami) {
                     var selected = getCellFromMami(this.selectedAlly);
                     var targetCell = getCellFromMami(targetMami);
-                    if (selected.tryMoveTo(targetCell)) {
+                    if (selected.canMoveTo(targetCell)) {
+                        selected.moveTo(targetCell);
                         updateMamiForCell(this.selectedAlly, selected);
                         updateMamiForCell(targetMami, targetCell);
                         this.selectedAlly = undefined;
@@ -273,7 +262,7 @@ var cellSize = 50;
                                 console.log('翻开一颗 ' + cell.camp + ' 棋子。');
 
                                 if (this.camp == undefined) {
-                                    this.camp = cell.camp;
+                                    camper.assignCamp(cell.camp, this, aiPlayer);
                                 }
                                 cell.hidden = false;
                                 clicked.addClass('discovered ' + cell.camp).text(cell.name);
