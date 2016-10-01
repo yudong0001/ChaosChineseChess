@@ -133,7 +133,7 @@ var cellSize = 50;
                 '炮': {count:2, cbMoveTo:function(piece){
                     if (isInStraightLine(this, piece)) {
                         var count = obstaclesCountOnStraightLine(this, piece);
-                        return (piece.camp == undefined && count == 0) || count == 1;
+                        return (piece.camp == undefined && count == 0) || (piece.camp != undefined && count == 1);
                     }
                     return false;
                 }},
@@ -238,8 +238,8 @@ var cellSize = 50;
                     for (var i = 0; i < candidates.length; i++) {
                         var candMami = $(candidates[i]);
                         var candCell = getCellFromMami(candMami);
-                        for (var i = 0; i < targets.length; i++) {
-                            var tarMami = $(targets[i]);
+                        for (var j = 0; j < targets.length; j++) {
+                            var tarMami = $(targets[j]);
                             var tarCell = getCellFromMami(tarMami);
                             if (candCell.canMoveTo(tarCell)) {
                                 validMovements.push({pieceMami:candMami, targetMami:tarMami});
