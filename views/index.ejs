@@ -24,6 +24,13 @@ var cellSize = 50;
                         player1.camp = firstCamp;
                         player2.camp = this.RED;
                     }
+                },
+                getEnemy: function(allyCamp) {
+                    if (allyCamp == this.RED) {
+                        return this.BLACK;
+                    } else if (allyCamp == this.BLACK) {
+                        return this.RED;
+                    }
                 }
             }
 
@@ -52,7 +59,6 @@ var cellSize = 50;
                 }
 
                 this.moveTo = function(anotherPiece) {
-                    console.log('吼吼，走了一步。');
                     if (anotherPiece.name == EMPTY_NAME) {
                         replaceTarget(anotherPiece, this);
                     }else {
@@ -198,24 +204,6 @@ var cellSize = 50;
                 return board[y][x];
             }
 
-            // AIPlayer 的难度依据 AI 是否知晓盘面全局（未翻开的棋子）划分。
-            var aiPlayer = {
-                camp: undefined,
-                testCouldMove: function(pieceMami, targetMami) {
-                    var piece = getCellFromMami(pieceMami);
-                    var target = getCellFromMami(targetMami);
-                    return piece.canMoveTo(targetMami);
-                },
-                play: function() {
-                    console.log('电脑检测有无已翻开的己方棋子并尝试走动。');
-
-                    var candidates = $('.' + this.camp + '.discovered:not(.empty)').get();
-                    console.log('TODO: ', candidates);
-
-                    console.log('走动失败，随机（或有选择的，依据难度不同）翻开棋子。');
-                    console.log('无可用下一步，则检测是否输局或 Pass 一步。');
-                },
-            };
             function updateMamiForCell(jqMami, cell) {
                 if (cell.hidden) {
                     return;
@@ -233,6 +221,64 @@ var cellSize = 50;
                     }
                 }
             }
+
+            // AIPlayer 的难度依据 AI 是否知晓盘面全局（未翻开的棋子）划分。
+            var aiPlayer = {
+                camp: undefined,
+                testCouldMove: function(pieceMami, targetMami) {
+                    var piece = getCellFromMami(pieceMami);
+                    var target = getCellFromMami(targetMami);
+                    return piece.canMoveTo(targetMami);
+                },
+                play: function() {
+                    // 电脑检测有无已翻开的己方棋子并尝试走动。
+                    var candidates = $('.' + this.camp + '.discovered:not(.empty)').get();
+                    var targets = $('.discovered:not(.' + this.camp + ')').get();
+                    var validMovements = [];
+                    for (var i = 0; i < candidates.length; i++) {
+                        var candMami = $(candidates[i]);
+                        var candCell = getCellFromMami(candMami);
+                        for (var i = 0; i < targets.length; i++) {
+                            var tarMami = $(targets[i]);
+                            var tarCell = getCellFromMami(tarMami);
+                            if (candCell.canMoveTo(tarCell)) {
+                                validMovements.push({pieceMami:candMami, targetMami:tarMami});
+                            }
+                        }
+                    }
+                    if (validMovements.length > 0) {
+                        var mm = validMovements[0];
+                        var piece = getCellFromMami(mm.pieceMami);
+                        console.log('电脑的' + piece.name + '走了一步');
+                        var target = getCellFromMami(mm.targetMami);
+                        piece.moveTo(target);
+                        updateMamiForCell(mm.pieceMami, piece);
+                        updateMamiForCell(mm.targetMami, target);
+                        return;
+                    }
+
+                    // 走动失败，随机（或有选择的，依据难度不同）翻开棋子。
+                    var undiscovered = $('.cell:not(.discovered)').get();
+                    if (undiscovered.length > 0) {
+                        var toBeDiscoveredMami = $(undiscovered[randomInt(undiscovered.length)]);
+                        var toBeDiscovered = getCellFromMami(toBeDiscoveredMami);
+                        console.log('电脑翻开了 ' + toBeDiscovered.camp + ' ' + toBeDiscovered.name);
+                        toBeDiscovered.hidden = false;
+                        updateMamiForCell(toBeDiscoveredMami, toBeDiscovered);
+                        return;
+                    }
+
+                    // 无可用下一步，则检测是否输局或 Pass 一步。
+                    var restPieces = $('.discovered.' + this.camp).get();
+                    var restEnemies = $('.discovered.' + camper.getEnemy(this.camp));
+                    if (restPieces.length == 0 && restEnemies.length > 0) {
+                        console.log('电脑认输');
+                    } else {
+                        console.log('电脑 Pass 一步');
+                    }
+                },
+            };
+
             var humanPlayer = {
                 selectedAlly: undefined,
                 camp: undefined,
@@ -253,7 +299,6 @@ var cellSize = 50;
                     var clicked = $(e.currentTarget);
                     var cell = getCellFromMami(clicked);
 
-                    console.log('TODO：现在已有选中棋子时，点击未翻开的棋子会翻开棋子，行为不对。');
                     if (this.selectedAlly == undefined) {
                         if (cell.name == EMPTY_NAME) {
                             console.log('点击空地。');
