@@ -13,6 +13,10 @@ var cellSize = 50;
         $(document).ready(function(){
             var EMPTY_NAME = '空';
 
+            $.getJSON('/play', function(data){
+                console.log(data);
+            });
+
             var camper = {
                 RED: 'red',
                 BLACK: 'black',
