@@ -13,7 +13,7 @@ var cellSize = 50;
         $(document).ready(function(){
             var EMPTY_NAME = '空';
 
-            $.getJSON('/play', function(data){
+            $.post('/play/flip', {hw:'cao'}, function(data){
                 console.log(data);
             });
 
