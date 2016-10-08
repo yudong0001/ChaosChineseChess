@@ -19,7 +19,10 @@ router.post('/flip', function(req, res){
     req.session.count++;
     if (req.session.board == undefined) {
         req.session.board = {
-            placeholder: '占位内容'
+            placeholder: '占位内容',
+            foo: function(){
+                console.log('blablabla');
+            }
         }
     }
     var board = req.session.board;
