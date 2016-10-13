@@ -1,15 +1,6 @@
-function Board(){
-    
-    this.getWholeBoard = function(){
-
-    };
-
-    this.queryPiece = function(x, y){
-
-    };
-};
-
 var EMPTY_NAME = '空';
+var rowsCount = 5;
+var columnsCount = 9;
 
 var board = [];
 var deadPieces = [];
@@ -191,4 +182,12 @@ for (var i = 0; i < rowsCount; i++) {
     }
 }
 
-exports.board = Board;
+function Board(){
+    return {
+        grids: board,
+        columnsCount: columnsCount,
+        rowsCount: rowsCount
+    };
+};
+
+exports.Board = Board;

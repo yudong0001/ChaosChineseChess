@@ -1,9 +1,18 @@
-var express = require('express');
-var router = express.Router();
+var router = require('express').Router();
+var board = require('../models/board').Board();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: '迷你象棋' });
+    if (req.session.board == undefined) {
+        req.session.board = board;
+        req.session.reqCount = 0;
+    }
+    req.session.reqCount++;
+    res.render('index', {
+        title: '迷你象棋',
+        rowsCount: board.rowsCount,
+        columnsCount: board.columnsCount
+    });
 });
 
 module.exports = router;

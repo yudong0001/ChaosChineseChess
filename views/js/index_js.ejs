@@ -4,11 +4,7 @@
 $(document).ready(function(){
     var EMPTY_NAME = '空';
 
-    $.post('/play', {hw:'cao'}, function(data){
-        console.log(data);
-    });
-
-    $.post('/play/flip', {hw:'cao'}, function(data){
+    $.post('/play', {x:1, y:1}, function(data){
         console.log(data);
     });
 
@@ -21,7 +17,7 @@ $(document).ready(function(){
         var y = jqMami.css('top');
         x = x.substring(0, x.length - 2) / cellSize;
         y = y.substring(0, y.length - 2) / cellSize;
-        return board[y][x];
+        return {x: x, y: y};
     }
 
     function updateMamiForCell(jqMami, cell) {
@@ -33,12 +29,7 @@ $(document).ready(function(){
         if (cell.name == EMPTY_NAME) {
             jqMami.removeClass('red discovered selected').addClass('discovered empty').text('');
         } else {
-            jqMami.removeClass('red black').text(cell.name);
-            if (cell.camp == camper.RED) {
-                jqMami.addClass(camper.RED);
-            } else {
-                jqMami.addClass(camper.BLACK);
-            }
+            jqMami.removeClass('red black').addClass(cell.camp).text(cell.name);
         }
     }
 
@@ -98,6 +89,17 @@ $(document).ready(function(){
             }
         },
     };
+
+    // ==== MoveTo ===
+    // Post data:
+    /*
+        selected: {x, y}
+        target: {x, y}
+    */
+    // Return data:
+    /*
+        isMoved
+    */
 
     var humanPlayer = {
         selectedAlly: undefined,
