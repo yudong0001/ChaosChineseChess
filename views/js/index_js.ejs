@@ -1,12 +1,10 @@
 
 <script type="text/javascript" src="/javascripts/jquery.min.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function(){
+    
     var EMPTY_NAME = '空';
-
-    $.post('/play', {x:1, y:1}, function(data){
-        console.log(data);
-    });
 
     var rowsCount = <%=rowsCount%>;
     var columnsCount = <%=columnsCount%>;
@@ -33,149 +31,27 @@ $(document).ready(function(){
         }
     }
 
-    // AIPlayer 的难度依据 AI 是否知晓盘面全局（未翻开的棋子）划分。
-    var aiPlayer = {
-        camp: undefined,
-        testCouldMove: function(pieceMami, targetMami) {
-            var piece = getCellFromMami(pieceMami);
-            var target = getCellFromMami(targetMami);
-            return piece.canMoveTo(targetMami);
-        },
-        play: function() {
-            // 电脑检测有无已翻开的己方棋子并尝试走动。
-            var candidates = $('.' + this.camp + '.discovered:not(.empty)').get();
-            var targets = $('.discovered:not(.' + this.camp + ')').get();
-            var validMovements = [];
-            for (var i = 0; i < candidates.length; i++) {
-                var candMami = $(candidates[i]);
-                var candCell = getCellFromMami(candMami);
-                for (var j = 0; j < targets.length; j++) {
-                    var tarMami = $(targets[j]);
-                    var tarCell = getCellFromMami(tarMami);
-                    if (candCell.canMoveTo(tarCell)) {
-                        validMovements.push({pieceMami:candMami, targetMami:tarMami});
-                    }
-                }
-            }
-            if (validMovements.length > 0) {
-                var mm = validMovements[0];
-                var piece = getCellFromMami(mm.pieceMami);
-                console.log('电脑的' + piece.name + '走了一步');
-                var target = getCellFromMami(mm.targetMami);
-                piece.moveTo(target);
-                updateMamiForCell(mm.pieceMami, piece);
-                updateMamiForCell(mm.targetMami, target);
-                return;
-            }
-
-            // 走动失败，随机（或有选择的，依据难度不同）翻开棋子。
-            var undiscovered = $('.cell:not(.discovered)').get();
-            if (undiscovered.length > 0) {
-                var toBeDiscoveredMami = $(undiscovered[randomInt(undiscovered.length)]);
-                var toBeDiscovered = getCellFromMami(toBeDiscoveredMami);
-                console.log('电脑翻开了 ' + toBeDiscovered.camp + ' ' + toBeDiscovered.name);
-                toBeDiscovered.hidden = false;
-                updateMamiForCell(toBeDiscoveredMami, toBeDiscovered);
-                return;
-            }
-
-            // 无可用下一步，则检测是否输局或 Pass 一步。
-            var restPieces = $('.discovered.' + this.camp).get();
-            var restEnemies = $('.discovered.' + camper.getEnemy(this.camp));
-            if (restPieces.length == 0 && restEnemies.length > 0) {
-                console.log('电脑认输');
-            } else {
-                console.log('电脑 Pass 一步');
-            }
-        },
-    };
-
-    // ==== MoveTo ===
-    // Post data:
-    /*
-        selected: {x, y}
-        target: {x, y}
-    */
-    // Return data:
-    /*
-        isMoved
-    */
-
-    var humanPlayer = {
-        selectedAlly: undefined,
-        camp: undefined,
-        tryMovePiece: function(targetMami) {
-            var selected = getCellFromMami(this.selectedAlly);
-            var targetCell = getCellFromMami(targetMami);
-            if (selected.canMoveTo(targetCell)) {
-                selected.moveTo(targetCell);
-                updateMamiForCell(this.selectedAlly, selected);
-                updateMamiForCell(targetMami, targetCell);
-                this.selectedAlly = undefined;
-                aiPlayer.play();
-            } else {
-                console.log('不能这么走，你要去学一学中国象棋基本规则。');
-            }
-        },
-        play: function(e) {
-            var clicked = $(e.currentTarget);
-            var cell = getCellFromMami(clicked);
-
-            if (this.selectedAlly == undefined) {
-                if (cell.name == EMPTY_NAME) {
-                    console.log('点击空地。');
-                } else {
-                    if (cell.hidden) {
-                        console.log('翻开一颗 ' + cell.camp + ' 棋子。');
-
-                        if (this.camp == undefined) {
-                            camper.assignCamp(cell.camp, this, aiPlayer);
-                        }
-                        cell.hidden = false;
-                        clicked.addClass('discovered ' + cell.camp).text(cell.name);
-                        aiPlayer.play();
-                    } else {
-                        if (this.camp == cell.camp) {
-                            console.log('选择一颗己方 ' + cell.camp + ' 棋子。');
-                            clicked.addClass('selected');
-                            this.selectedAlly = clicked;
-                        } else {
-                            console.log('敌方棋子，无法选择。');
-                        }
-                    }
-                }
-            } else {
-                if (cell.name == EMPTY_NAME) {
-                    this.tryMovePiece(clicked);
-                } else {
-                    if (cell.hidden) {
-                        console.log('要翻开棋子，请取消当前选择的棋子。');
-                        return;
-                    }
-                    if (cell.camp == this.camp) {
-                        $('.cell').removeClass('selected');
-                        if (this.selectedAlly.get(0) == clicked.get(0)) {
-                            console.log('取消选择。');
-                            this.selectedAlly = undefined;
-                        } else {
-                            console.log('切换选择。');
-                            clicked.addClass('selected');
-                            this.selectedAlly = clicked;
-                        }
-                    } else {
-                        this.tryMovePiece(clicked);
-                    }
-                }
-            }
-        },
-    };
+    /*$.post('/play', {x:1, y:1}, function(data){
+        console.log('result for post to /play: %o',data);
+    });*/
 
     $('.cell').click(function(e){
-        humanPlayer.play(e);
+        console.log('cell click called: %o',e);//***************
+        //humanPlayer.play(e);
+        var clicked = $(e.currentTarget);
+        var cell = getCellFromMami(clicked);
+
+        $.post('/play', {x:cell.x,y:cell.y}, function(data){
+            console.log('result after click: %o',data);
+            //doAction(data);
+            clicked.addClass('discovered ' + data.cell.camp).text(data.cell.name);
+        });
     });
+
     $('.cell').each(function(i, o){
         var jqMami = $(o);
         updateMamiForCell(jqMami, getCellFromMami(jqMami));
     });
+
 });
 </script>

@@ -11,7 +11,8 @@ router.get('/', function(req, res, next) {
     res.render('index', {
         title: '迷你象棋',
         rowsCount: board.rowsCount,
-        columnsCount: board.columnsCount
+        columnsCount: board.columnsCount,
+        grids: board.grids
     });
 });
 

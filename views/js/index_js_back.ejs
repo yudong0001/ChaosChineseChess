@@ -1,9 +1,19 @@
-var router = require('express').Router();
-var camper = require('../models/camper');
 
-	var EMPTY_NAME = '空';
+<script type="text/javascript" src="/javascripts/jquery.min.js"></script>
 
-	function getCellFromMami(jqMami) {
+<script type="text/javascript">
+$(document).ready(function(){
+    var EMPTY_NAME = '空';
+
+    $.post('/play', {x:1, y:1}, function(data){
+        console.log(data);
+    });
+
+    var rowsCount = <%=rowsCount%>;
+    var columnsCount = <%=columnsCount%>;
+    var cellSize = <%=cellSize%>;
+
+    function getCellFromMami(jqMami) {
         var x = jqMami.css('left');
         var y = jqMami.css('top');
         x = x.substring(0, x.length - 2) / cellSize;
@@ -79,7 +89,7 @@ var camper = require('../models/camper');
                 console.log('电脑 Pass 一步');
             }
         },
-    };//***AI Player***
+    };
 
     // ==== MoveTo ===
     // Post data:
@@ -109,31 +119,23 @@ var camper = require('../models/camper');
             }
         },
         play: function(e) {
-            //var clicked = $(e.currentTarget);
-            //var cell = getCellFromMami(clicked);
-            var requ = e.req;
-            var resp = e.res;
-            var cell = global.board[requ.body.y][requ.body.x];
+            var clicked = $(e.currentTarget);
+            var cell = getCellFromMami(clicked);
 
-            console.log('get board from global:%o', cell);//***************
-
+            console.log('cell clicked: %o',cell);//***************
             if (this.selectedAlly == undefined) {
                 if (cell.name == EMPTY_NAME) {
-                    console.log('点击空地。');//*************
+                    console.log('点击空地。');
                 } else {
                     if (cell.hidden) {
-                        console.log('翻开一颗 ' + cell.camp + ' 棋子。');//**********
+                        console.log('翻开一颗 ' + cell.camp + ' 棋子。');
 
                         if (this.camp == undefined) {
                             camper.assignCamp(cell.camp, this, aiPlayer);
                         }
                         cell.hidden = false;
-                        /*clicked.addClass('discovered ' + cell.camp).text(cell.name);*/
-                        resp.json({
-                            action:'discover',
-                            cell:cell
-                        });
-                        //aiPlayer.play();
+                        clicked.addClass('discovered ' + cell.camp).text(cell.name);
+                        aiPlayer.play();
                     } else {
                         if (this.camp == cell.camp) {
                             console.log('选择一颗己方 ' + cell.camp + ' 棋子。');
@@ -168,23 +170,16 @@ var camper = require('../models/camper');
                 }
             }
         },
-    };//***humanPlayer***
+    };
 
-router.post('/',function(req,res){
-	console.log('-----::'+req.body.x);//************
-    humanPlayer.play({req:req, res:res});    
-});
-
-/*router.all('/', function(req, res){
-    //console.log('-----'+req.body.x);
-    humanPlayer.play({x:req.body.x, y:req.body.y});
-    req.session.count++;
-    res.json({
-        result:'success',
-        movement:true,
-        sessionID: req.session.id,
-        reqCount: req.session.reqCount
+    $('.cell').click(function(e){
+        console.log('cell click called:');//***************
+        console.log('session.board is :%o',local.session.board);//************
+        humanPlayer.play(e);
     });
-});*/
-
-module.exports = router;
+    $('.cell').each(function(i, o){
+        var jqMami = $(o);
+        updateMamiForCell(jqMami, getCellFromMami(jqMami));
+    });
+});
+</script>

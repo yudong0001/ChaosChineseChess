@@ -9,12 +9,12 @@ var cellSize = 50;
     <% include js/index_js %>
   </head>
   <body>
-    <h1><%= title %></h1>
+    <!-- <h1><%= title %></h1> -->
     <p>欢迎赏玩<%= title %></p>
 	<div id="board">
 	<% for (var i = 0; i < rowsCount; i++) { %>
 		<% for (var j = 0; j < columnsCount; j++) { %>
-			<div class="cell" style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;">
+      <div class="cell" style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;" >                
 			</div>
 		<% } %>
 		<br>

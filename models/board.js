@@ -5,7 +5,7 @@ var columnsCount = 9;
 var board = [];
 var deadPieces = [];
 
-var camper = {
+/*var camper = {
     RED: 'red',
     BLACK: 'black',
     assignCamp: function (firstCamp, player1, player2) {
@@ -24,7 +24,8 @@ var camper = {
             return this.RED;
         }
     }
-}
+}*/
+var camper = require('./camper');
 
 function Piece(name, camp, x, y, cbMoveTo) {
     this.name = name;
@@ -145,8 +146,10 @@ function createPiecesFor(camp) {
         createPiece(camp, o, piecesDesc[o]);
     });
 }
-createPiecesFor(camper.RED);
-createPiecesFor(camper.BLACK);
+/*createPiecesFor(camper.RED);
+createPiecesFor(camper.BLACK);*/
+createPiecesFor('red');
+createPiecesFor('black');
 
 function popAPieceTo(x, y) {
     if (availablePieces.length > 0) {
@@ -183,6 +186,7 @@ for (var i = 0; i < rowsCount; i++) {
 }
 
 function Board(){
+    global.board = board;
     return {
         grids: board,
         columnsCount: columnsCount,
