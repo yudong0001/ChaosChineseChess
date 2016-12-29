@@ -14,7 +14,7 @@ var cellSize = 50;
 	<div id="board">
 	<% for (var i = 0; i < rowsCount; i++) { %>
 		<% for (var j = 0; j < columnsCount; j++) { %>
-      <div class="cell" style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;" >                
+      <div id="cell<%= i %><%= j %>" class="cell" style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;" >                
 			</div>
 		<% } %>
 		<br>

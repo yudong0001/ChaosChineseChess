@@ -37,14 +37,22 @@ $(document).ready(function(){
 
     $('.cell').click(function(e){
         console.log('cell click called: %o',e);//***************
-        //humanPlayer.play(e);
-        var clicked = $(e.currentTarget);
-        var cell = getCellFromMami(clicked);
 
-        $.post('/play', {x:cell.x,y:cell.y}, function(data){
+        var clicked = $(e.currentTarget);
+        var cellpos = getCellFromMami(clicked);
+
+        $.post('/play',cellpos, function(data){
             console.log('result after click: %o',data);
-            //doAction(data);
-            clicked.addClass('discovered ' + data.cell.camp).text(data.cell.name);
+            switch (data.action){
+                case 'discover':clicked.addClass('discovered ' + data.cell.camp).text(data.cell.name);break;
+                case 'select':clicked.addClass('selected');break;
+                case 'unselect':$('.cell').removeClass('selected');break;
+                case 'exchange':$('.cell').removeClass('selected');clicked.addClass('selected');break;
+                case 'kill':
+                    clicked.removeClass(data.killed.camp).addClass(data.killer.camp).text(data.killer.name);
+                    $('#cell'+data.killer.y+data.killer.x).removeClass('selected '+data.killer.camp).text(" ");
+                    break;
+            }
         });
     });
 

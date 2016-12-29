@@ -95,37 +95,57 @@ var camper = require('../models/camper');
     var humanPlayer = {
         selectedAlly: undefined,
         camp: undefined,
-        tryMovePiece: function(targetMami) {
-            var selected = getCellFromMami(this.selectedAlly);
-            var targetCell = getCellFromMami(targetMami);
+        tryMovePiece: function(resp,targetMami) {
+            /*var selected = getCellFromMami(this.selectedAlly);
+            var targetCell = getCellFromMami(targetMami);*/
+            var selected = this.selectedAlly;
+            var targetCell = targetMami;
+            var killer = selected;
+            var killed = targetCell;
             if (selected.canMoveTo(targetCell)) {
-                selected.moveTo(targetCell);
+                /*selected.moveTo(targetCell);
                 updateMamiForCell(this.selectedAlly, selected);
                 updateMamiForCell(targetMami, targetCell);
+                this.selectedAlly = undefined;*/
+                resp.json({
+                    action:'kill',
+                    killer:killer,
+                    killed:killed
+                });
+                selected.moveTo(targetCell);
                 this.selectedAlly = undefined;
-                aiPlayer.play();
+                //aiPlayer.play();
             } else {
                 console.log('不能这么走，你要去学一学中国象棋基本规则。');
+                resp.json();
             }
         },
         play: function(e) {
-            //var clicked = $(e.currentTarget);
-            //var cell = getCellFromMami(clicked);
+            console.log('enter humanPlayer.play');//************
+            
+            /*var clicked = $(e.currentTarget);
+            var cell = getCellFromMami(clicked);*/
             var requ = e.req;
             var resp = e.res;
-            var cell = global.board[requ.body.y][requ.body.x];
+            var cellpos = {x:e.posx ,y:e.posy};
+            var cell = global.board[cellpos.y][cellpos.x];
 
             console.log('get board from global:%o', cell);//***************
+            console.log('who is this in humanPlayer.play: %o',this);//**************
+
 
             if (this.selectedAlly == undefined) {
                 if (cell.name == EMPTY_NAME) {
                     console.log('点击空地。');//*************
+                    resp.json();
                 } else {
                     if (cell.hidden) {
                         console.log('翻开一颗 ' + cell.camp + ' 棋子。');//**********
 
                         if (this.camp == undefined) {
+                            //assign camp to player1&player2
                             camper.assignCamp(cell.camp, this, aiPlayer);
+                            console.log('who is this after assignCamp: %o',this);//**************
                         }
                         cell.hidden = false;
                         /*clicked.addClass('discovered ' + cell.camp).text(cell.name);*/
@@ -137,33 +157,49 @@ var camper = require('../models/camper');
                     } else {
                         if (this.camp == cell.camp) {
                             console.log('选择一颗己方 ' + cell.camp + ' 棋子。');
-                            clicked.addClass('selected');
-                            this.selectedAlly = clicked;
+                            /*clicked.addClass('selected');
+                            this.selectedAlly = clicked;*/
+                            this.selectedAlly = cell;
+                            resp.json({
+                                action:'select',
+                                cell:cell
+                            });
                         } else {
                             console.log('敌方棋子，无法选择。');
+                            resp.json();
                         }
                     }
                 }
             } else {
                 if (cell.name == EMPTY_NAME) {
-                    this.tryMovePiece(clicked);
+                    /*this.tryMovePiece(clicked);*/
+                    this.tryMovePiece(resp,cell);
                 } else {
                     if (cell.hidden) {
                         console.log('要翻开棋子，请取消当前选择的棋子。');
+                        resp.json();
                         return;
                     }
                     if (cell.camp == this.camp) {
-                        $('.cell').removeClass('selected');
-                        if (this.selectedAlly.get(0) == clicked.get(0)) {
+                        //$('.cell').removeClass('selected');
+                        // if (this.selectedAlly.get(0) == clicked.get(0)) {
+                        if (this.selectedAlly == cell) {
                             console.log('取消选择。');
                             this.selectedAlly = undefined;
+                            resp.json({
+                                action:'unselect'
+                            });
                         } else {
                             console.log('切换选择。');
-                            clicked.addClass('selected');
-                            this.selectedAlly = clicked;
+                            //clicked.addClass('selected');
+                            this.selectedAlly = cell;
+                            resp.json({
+                                action:'exchange'
+                            });
                         }
                     } else {
-                        this.tryMovePiece(clicked);
+                        /*this.tryMovePiece(clicked);*/
+                        this.tryMovePiece(resp,cell);
                     }
                 }
             }
@@ -171,8 +207,8 @@ var camper = require('../models/camper');
     };//***humanPlayer***
 
 router.post('/',function(req,res){
-	console.log('-----::'+req.body.x);//************
-    humanPlayer.play({req:req, res:res});    
+	console.log('-----:: %o',req.body.x);//************
+    humanPlayer.play({req:req ,res:res ,posx:req.body.x ,posy:req.body.y});
 });
 
 /*router.all('/', function(req, res){
