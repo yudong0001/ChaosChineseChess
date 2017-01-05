@@ -19,6 +19,7 @@ $(document).ready(function(){
     }
 
     function updateMamiForCell(jqMami, cell) {
+        console.log('cell in update function: %o',cell);//*********
         if (cell.hidden) {
             return;
         } else {
@@ -31,35 +32,104 @@ $(document).ready(function(){
         }
     }
 
+    var ai = false;
+
+    function updateCell(cell) {
+        console.log('cell in update function: %o',cell);//*********
+        var jqMami = $('#cell'+cell.y+cell.x);
+        if (cell.hidden) {
+            return;
+        } else {
+            jqMami.addClass('discovered');
+        }
+        if (cell.name == EMPTY_NAME) {
+            jqMami.removeClass('red black selected').addClass('empty').text('');
+        } else {
+            jqMami.removeClass('red black selected').addClass(cell.camp).text(cell.name);
+        }
+    }
+
+    function updateBoard(){
+        console.log('Update board.');//*********
+        $('.cell').each(function(i, o){
+            var jqMami = $(o);
+            updateMamiForCell(jqMami, getCellFromMami(jqMami));
+        });
+    }
+
+    function trigAI(){
+        console.log('trigger AI action.ai:'+ai);//***********
+        /*var isai = isAI;
+        if(isai){
+            isai = false;
+            $('#cell00').trigger('click');
+        }
+        return isai;*/
+        var maxCellC = columnsCount-1;
+        var maxCellR = rowsCount-1;
+        $('#cell' + maxCellR + maxCellC ).trigger('click');
+        console.log('cell triggered for AI: #cell' + maxCellR + maxCellC );//**************
+    };
+
     /*$.post('/play', {x:1, y:1}, function(data){
         console.log('result for post to /play: %o',data);
     });*/
 
+    //var playerId = "humanPlayer";
     $('.cell').click(function(e){
         console.log('cell click called: %o',e);//***************
 
         var clicked = $(e.currentTarget);
-        var cellpos = getCellFromMami(clicked);
+        var cellPos = getCellFromMami(clicked);
+        var wTime = 50;
+        console.log('ai in loc1:'+ai);//************
 
-        $.post('/play',cellpos, function(data){
-            console.log('result after click: %o',data);
+        $.post('/play',{ player:ai?"AI":"humanPlayer" ,x:cellPos.x, y:cellPos.y }, function(data){
+            console.log('resp data from server: %o',data);
             switch (data.action){
-                case 'discover':clicked.addClass('discovered ' + data.cell.camp).text(data.cell.name);break;
-                case 'select':clicked.addClass('selected');break;
-                case 'unselect':$('.cell').removeClass('selected');break;
-                case 'exchange':$('.cell').removeClass('selected');clicked.addClass('selected');break;
+                case 'discover':
+                    //$('#cell'+data.cell.y+data.cell.x).addClass('discovered ' + data.cell.camp).text(data.cell.name);
+                    updateCell(data.cell);
+                    ai = !ai;break;
+                case 'select':$('#cell'+data.cell.y+data.cell.x).addClass('selected');break;
+                case 'unselect':$('#cell'+data.cell.y+data.cell.x).removeClass('selected');break;
+                case 'xselect':$('.cell').removeClass('selected');$('#cell'+data.cell.y+data.cell.x).addClass('selected');break;
                 case 'kill':
-                    clicked.removeClass(data.killed.camp).addClass(data.killer.camp).text(data.killer.name);
-                    $('#cell'+data.killer.y+data.killer.x).removeClass('selected '+data.killer.camp).text(" ");
+                    /*$('#cell'+data.killed.y+data.killed.x).removeClass(data.killed.camp).addClass(data.killer.camp).text(data.killer.name);
+                    $('#cell'+data.killer.y+data.killer.x).removeClass('selected '+data.killer.camp).text(" ");*/
+                    $('#cell'+data.killer.y+data.killer.x).addClass('selected');
+                    wTime = 1000;
+                    setTimeout(function(){
+                        updateCell(data.killer);
+                        updateCell(data.killed);
+                        ai = !ai;
+                    }, wTime);
                     break;
+                case 'finished':ai = false;break;
+                case 'pass':ai = false;break;
             }
+            //updateBoard();
+            console.log('ai after post: '+ ai);//**********
+            setTimeout(function(){
+                wTime = 50;
+                if(ai){
+                    console.log('trig AI');//**********
+                    trigAI();
+                }
+            }, wTime);
+            
         });
     });
 
-    $('.cell').each(function(i, o){
-        var jqMami = $(o);
-        updateMamiForCell(jqMami, getCellFromMami(jqMami));
-    });
+    /*function updateBoard(){
+        $('.cell').each(function(i, o){
+            var jqMami = $(o);
+            updateMamiForCell(jqMami, getCellFromMami(jqMami));
+        });
+    }*/
+
+    //setInterval("ai=trigAI(ai)",5000);
 
 });
+
 </script>
