@@ -135,21 +135,23 @@ var piecesDesc = {
         return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
     }}
 };
+
 var availablePieces = [];
+
 function createPiece(camp, name, desc) {
     for (var i = 0; i < desc.count; i++) {
         availablePieces.push({camp: camp, name: name, cb: desc.cbMoveTo});
     }
 }
+
 function createPiecesFor(camp) {
     Object.keys(piecesDesc).forEach(function(o){
         createPiece(camp, o, piecesDesc[o]);
     });
 }
-/*createPiecesFor(camper.RED);
-createPiecesFor(camper.BLACK);*/
-createPiecesFor('red');
-createPiecesFor('black');
+
+/*createPiecesFor('red');
+createPiecesFor('black');*/
 
 function popAPieceTo(x, y) {
     if (availablePieces.length > 0) {
@@ -167,7 +169,7 @@ function popAPieceTo(x, y) {
 
 var emptyColumn = Math.floor(columnsCount / 2);
 var emptyRow = rowsCount - 1;
-for (var i = 0; i < rowsCount; i++) {
+/*for (var i = 0; i < rowsCount; i++) {
     board.push([]);
     if (i == emptyRow) {
         for (var j = 0; j < columnsCount; j++) {
@@ -183,9 +185,30 @@ for (var i = 0; i < rowsCount; i++) {
             }
         }
     }
-}
+}*/
 
 function Board(){
+    console.log('start renew board.');//***********
+    board = [];
+    createPiecesFor('red');
+    createPiecesFor('black');
+    for (var i = 0; i < rowsCount; i++) {
+        board.push([]);
+        if (i == emptyRow) {
+            for (var j = 0; j < columnsCount; j++) {
+                board[i].push(createEmptyPieceAt(j, i));
+            }
+        } else {
+
+            for (var j = 0; j < columnsCount; j++) {
+                if (j == emptyColumn) {
+                    board[i].push(createEmptyPieceAt(j, i));
+                } else {
+                    board[i].push(popAPieceTo(j, i));
+                }
+            }
+        }
+    }
     global.board = board;
     return {
         grids: board,

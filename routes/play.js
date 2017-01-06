@@ -46,7 +46,7 @@ var camper = require('../models/camper');
 
             var requ = e.req;
             var resp = e.res;
-            //var board = requ.session.board.grids;
+            //var board = requ.session.board;
             var board = global.board;
             var rangeX = requ.session.board.columnsCount;
             var rangeY = requ.session.board.rowsCount-1;
@@ -54,8 +54,7 @@ var camper = require('../models/camper');
             var targets = [];
             var validMovements = [];
 
-            console.log('entr AIPlayer.play.');
-            //console.log('entr AIPlayer.play ,board[1][1] is: %o' ,board[1][1]);//***********
+            console.log('entr AIPlayer.play ,board[0][0] is: %o' ,board[0][0]);//***********
 
             var count1=count2=0;
             for (var i = rangeY - 1; i >= 0; i--) {//row number
@@ -110,7 +109,7 @@ var camper = require('../models/camper');
             // 走动失败，随机（或有选择的，依据难度不同）翻开棋子。
             /*var undiscovered = $('.cell:not(.discovered)').get();*/
             var undiscovered = [];
-            console.log('start AIPlayer.undiscovered.');//************
+            console.log('start discovering by AI.');//************
 
             count1=count2=0;
             for (var i = rangeY - 1; i >= 0; i--) {
@@ -147,9 +146,9 @@ var camper = require('../models/camper');
             count1=count2=0;
             for (var i = rangeY - 1; i >= 0; i--) {
                 for(var j=0;j<rangeX;j++){
-                    console.log('for AI restPieces,current cell is %o',board[i][j]);//********
+                    //console.log('for AI restPieces,current cell is %o',board[i][j]);//********
                     if(board[i][j].camp == this.camp){
-                        restPieces[count1++].push(board[i][j]);
+                        restPieces.push(board[i][j]);
                     }
                 }
             };
@@ -195,7 +194,7 @@ var camper = require('../models/camper');
                 this.selectedAlly = undefined;*/
                 selected.moveTo(targetCell);
                 this.selectedAlly = undefined;
-                console.log('人类' + this.camp+killer.name + ' KO ' +killed.camp+killed.name);
+                console.log('人类' + this.camp+killer.name + ' KO ' +killed.camp+killed.name);//**********
                 resp.json({
                     action:'kill',
                     killer:killer,
@@ -203,7 +202,7 @@ var camper = require('../models/camper');
                 });
                 //aiPlayer.play(requ,resp);
             } else {
-                console.log('不能这么走，你要去学一学中国象棋基本规则。');
+                console.log('不能这么走，你要去学一学中国象棋基本规则。');//************
                 resp.json({
                     action:'canNotMove'
                 });
@@ -217,7 +216,9 @@ var camper = require('../models/camper');
             var requ = e.req;
             var resp = e.res;
             var cellpos = {x:e.posx ,y:e.posy};
-            var cell = global.board[cellpos.y][cellpos.x];
+            //var board = requ.session.board;
+            var board = global.board;
+            var cell = board[cellpos.y][cellpos.x];
 
             console.log('get req cell from global board: %o',cell);//***************
             console.log('who is this in humanPlayer.play: %o',this);//**************

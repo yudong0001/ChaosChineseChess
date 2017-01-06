@@ -33,6 +33,10 @@ a {
     background-color: yellow;
 }
 
+.killed.cell {
+    background-color: green;
+}
+
 .cell:hover {
     background-color: #ddd;
 }

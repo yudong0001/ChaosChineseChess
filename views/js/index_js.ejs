@@ -43,9 +43,9 @@ $(document).ready(function(){
             jqMami.addClass('discovered');
         }
         if (cell.name == EMPTY_NAME) {
-            jqMami.removeClass('red black selected').addClass('empty').text('');
+            jqMami.removeClass('red black selected killed').addClass('empty').text('');
         } else {
-            jqMami.removeClass('red black selected').addClass(cell.camp).text(cell.name);
+            jqMami.removeClass('red black selected killed').addClass(cell.camp).text(cell.name);
         }
     }
 
@@ -98,7 +98,8 @@ $(document).ready(function(){
                     /*$('#cell'+data.killed.y+data.killed.x).removeClass(data.killed.camp).addClass(data.killer.camp).text(data.killer.name);
                     $('#cell'+data.killer.y+data.killer.x).removeClass('selected '+data.killer.camp).text(" ");*/
                     $('#cell'+data.killer.y+data.killer.x).addClass('selected');
-                    wTime = 1000;
+                    $('#cell'+data.killed.y+data.killed.x).addClass('killed');
+                    if(ai)wTime = 1000;
                     setTimeout(function(){
                         updateCell(data.killer);
                         updateCell(data.killed);
@@ -111,25 +112,15 @@ $(document).ready(function(){
             //updateBoard();
             console.log('ai after post: '+ ai);//**********
             setTimeout(function(){
-                wTime = 50;
                 if(ai){
                     console.log('trig AI');//**********
+                    wTime = 50;
                     trigAI();
                 }
             }, wTime);
             
         });
     });
-
-    /*function updateBoard(){
-        $('.cell').each(function(i, o){
-            var jqMami = $(o);
-            updateMamiForCell(jqMami, getCellFromMami(jqMami));
-        });
-    }*/
-
-    //setInterval("ai=trigAI(ai)",5000);
-
 });
 
 </script>
