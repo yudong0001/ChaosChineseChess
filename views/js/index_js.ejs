@@ -65,10 +65,10 @@ $(document).ready(function(){
             $('#cell00').trigger('click');
         }
         return isai;*/
-        var maxCellC = columnsCount-1;
-        var maxCellR = rowsCount-1;
-        $('#cell' + maxCellR + maxCellC ).trigger('click');
-        console.log('cell triggered for AI: #cell' + maxCellR + maxCellC );//**************
+        var maxCellX = columnsCount-1;
+        var maxCellY = rowsCount-1;
+        $('#cell' + maxCellY + maxCellX ).trigger('click');
+        console.log('cell triggered for AI: #cell' + maxCellY + maxCellX );//**************
     };
 
     /*$.post('/play', {x:1, y:1}, function(data){

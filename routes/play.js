@@ -46,8 +46,9 @@ var camper = require('../models/camper');
 
             var requ = e.req;
             var resp = e.res;
+            var gameId = requ.session.gameId;
             //var board = requ.session.board;
-            var board = global.board;
+            var board = global.board[gameId];
             var rangeX = requ.session.board.columnsCount;
             var rangeY = requ.session.board.rowsCount-1;
             var candidates = [];
@@ -216,10 +217,12 @@ var camper = require('../models/camper');
             var requ = e.req;
             var resp = e.res;
             var cellpos = {x:e.posx ,y:e.posy};
+            var gameId = requ.session.gameId;
             //var board = requ.session.board;
-            var board = global.board;
+            var board = global.board[gameId];
             var cell = board[cellpos.y][cellpos.x];
 
+            console.log('global.board[gameId][1]: %o',board[3][8]);//*******
             console.log('get req cell from global board: %o',cell);//***************
             console.log('who is this in humanPlayer.play: %o',this);//**************
 
@@ -299,7 +302,7 @@ var camper = require('../models/camper');
     };//***humanPlayer***
 
 router.post('/',function(req,res){
-	console.log('-----:'+req.body.player +':'+req.body.x);//************
+	console.log('-----:'+req.body.player +':'+req.body.x+':gameId:'+req.session.gameId);//************
     if(req.body.player=="humanPlayer"){
         humanPlayer.play({ req:req ,res:res ,posx:req.body.x ,posy:req.body.y });
     }else{

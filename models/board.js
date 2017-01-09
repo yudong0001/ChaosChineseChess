@@ -1,3 +1,5 @@
+global.board = [];
+
 var EMPTY_NAME = '空';
 var rowsCount = 5;
 var columnsCount = 9;
@@ -187,7 +189,7 @@ var emptyRow = rowsCount - 1;
     }
 }*/
 
-function Board(){
+function Board(gameId){
     console.log('start renew board.');//***********
     board = [];
     createPiecesFor('red');
@@ -209,7 +211,9 @@ function Board(){
             }
         }
     }
-    global.board = board;
+    
+    global.board[gameId] = [];
+    global.board[gameId] = board;
     return {
         grids: board,
         columnsCount: columnsCount,

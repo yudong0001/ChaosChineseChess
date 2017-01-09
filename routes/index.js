@@ -2,13 +2,19 @@ var router = require('express').Router();
 // var board = require('../models/board').Board();
 var boardMami = require('../models/board');
 
+global.gameId = 0;
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    var board = boardMami.Board();
-    console.log('route:index.js: restart page ,grids[0][0]:%o',board.grids[0][0]);//********
+    if(req.session.gameId == undefined){
+        req.session.gameId = global.gameId++;
+    }
+    var board = boardMami.Board(req.session.gameId);
+    console.log('route:index.js: restart page ,grids[1][1]:%o',board.grids[1][1]);//********
     if (req.session.board == undefined) {
         req.session.board = board;
         req.session.reqCount = 0;
+
     }
 
     console.log('session.reqcount: '+req.session.reqCount);//********
