@@ -6,6 +6,9 @@ $(document).ready(function(){
     
     var EMPTY_NAME = '空';
 
+    var playMode = 'humanAI';
+    var playerColor = false;
+
     var rowsCount = <%=rowsCount%>;
     var columnsCount = <%=columnsCount%>;
     var cellSize = <%=cellSize%>;
@@ -18,21 +21,21 @@ $(document).ready(function(){
         return {x: x, y: y};
     }
 
-    function updateMamiForCell(jqMami, cell) {
-        console.log('cell in update function: %o',cell);//*********
-        if (cell.hidden) {
-            return;
-        } else {
-            jqMami.addClass('discovered');
-        }
-        if (cell.name == EMPTY_NAME) {
-            jqMami.removeClass('red discovered selected').addClass('discovered empty').text('');
-        } else {
-            jqMami.removeClass('red black').addClass(cell.camp).text(cell.name);
-        }
-    }
+    // function updateMamiForCell(jqMami, cell) {
+    //     console.log('cell in update function: %o',cell);//*********
+    //     if (cell.hidden) {
+    //         return;
+    //     } else {
+    //         jqMami.addClass('discovered');
+    //     }
+    //     if (cell.name == EMPTY_NAME) {
+    //         jqMami.removeClass('red discovered selected').addClass('discovered empty').text('');
+    //     } else {
+    //         jqMami.removeClass('red black').addClass(cell.camp).text(cell.name);
+    //     }
+    // }
 
-    var ai = false;
+    var enemy = false;
 
     function updateCell(cell) {
         console.log('cell in update function: %o',cell);//*********
@@ -58,64 +61,89 @@ $(document).ready(function(){
     }
 
     function trigAI(){
-        console.log('trigger AI action.ai:'+ai);//***********
-        /*var isai = isAI;
-        if(isai){
-            isai = false;
-            $('#cell00').trigger('click');
-        }
-        return isai;*/
+        console.log('trigger AI action.enemy:'+enemy);//***********
         var maxCellX = columnsCount-1;
         var maxCellY = rowsCount-1;
         $('#cell' + maxCellY + maxCellX ).trigger('click');
         console.log('cell triggered for AI: #cell' + maxCellY + maxCellX );//**************
     };
 
-    /*$.post('/play', {x:1, y:1}, function(data){
-        console.log('result for post to /play: %o',data);
-    });*/
+    $('#Restart').click(function(e){
+        window.location.reload();
+    });
 
-    //var playerId = "humanPlayer";
+    $('#AI').click(function(e){
+        playMode = 'humanAI';
+        $('#AI').addClass('selected');
+        $('#AI').hide();
+        $('#Human').hide();
+    });
+
+    $('#Human').click(function(e){
+        playMode = 'human';
+        $('#Human').addClass('selected');
+        $('#AI').hide();
+        $('#Human').hide();
+        $('#player2').text('HUMAN');
+        console.log('human mode clicked.playmode='+playMode);//*******
+    });
+
     $('.cell').click(function(e){
         console.log('cell click called: %o',e);//***************
+        if(!$('#AI').hasClass('selected')&&!$('#Human').hasClass('selected')){
+            $('#AI').trigger('click');
+        }
 
         var clicked = $(e.currentTarget);
         var cellPos = getCellFromMami(clicked);
         var wTime = 50;
-        console.log('ai in loc1:'+ai);//************
+        console.log('enemy in loc1:'+enemy);//************
+        console.log('playMode: '+playMode);//********
 
-        $.post('/play',{ player:ai?"AI":"humanPlayer" ,x:cellPos.x, y:cellPos.y }, function(data){
+        $.post('/play',{ playMode:playMode ,player:enemy?"enemy":"human" ,x:cellPos.x, y:cellPos.y }, function(data){
             console.log('resp data from server: %o',data);
             switch (data.action){
                 case 'discover':
-                    //$('#cell'+data.cell.y+data.cell.x).addClass('discovered ' + data.cell.camp).text(data.cell.name);
                     updateCell(data.cell);
-                    ai = !ai;break;
+                    enemy = !enemy;
+                    console.log('value of playerColor:'+playerColor);//******
+                    if(!playerColor){
+                        console.log('start add color for players,first:'+data.cell.camp);//*******
+                        playerColor = !playerColor;
+                        $('#player1').addClass(data.cell.camp);
+                        $('#player2').addClass(data.cell.camp=='red'?'black':'red');
+                    }
+                    break;
                 case 'select':$('#cell'+data.cell.y+data.cell.x).addClass('selected');break;
                 case 'unselect':$('#cell'+data.cell.y+data.cell.x).removeClass('selected');break;
                 case 'xselect':$('.cell').removeClass('selected');$('#cell'+data.cell.y+data.cell.x).addClass('selected');break;
                 case 'kill':
-                    /*$('#cell'+data.killed.y+data.killed.x).removeClass(data.killed.camp).addClass(data.killer.camp).text(data.killer.name);
-                    $('#cell'+data.killer.y+data.killer.x).removeClass('selected '+data.killer.camp).text(" ");*/
                     $('#cell'+data.killer.y+data.killer.x).addClass('selected');
                     $('#cell'+data.killed.y+data.killed.x).addClass('killed');
-                    if(ai)wTime = 1000;
+                    if(enemy)wTime = 1000;
                     setTimeout(function(){
                         updateCell(data.killer);
                         updateCell(data.killed);
-                        ai = !ai;
+                        enemy = !enemy;
                     }, wTime);
                     break;
-                case 'finished':ai = false;break;
-                case 'pass':ai = false;break;
+                case 'finished':enemy = false;break;
+                case 'pass':enemy = false;break;
             }
             //updateBoard();
-            console.log('ai after post: '+ ai);//**********
+            console.log('enemy after post: '+ enemy);//**********
             setTimeout(function(){
-                if(ai){
-                    console.log('trig AI');//**********
+                if(enemy){
                     wTime = 50;
-                    trigAI();
+                    if(playMode == 'humanAI'){
+                        console.log('trig AI');//**********
+                        trigAI();
+                    }
+                    $('.player').removeClass('playerBorder');
+                    $('#player2').addClass('playerBorder');
+                }else{
+                    $('.player').removeClass('playerBorder');
+                    $('#player1').addClass('playerBorder');
                 }
             }, wTime);
             

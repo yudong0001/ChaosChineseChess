@@ -7,26 +7,6 @@ var columnsCount = 9;
 var board = [];
 var deadPieces = [];
 
-/*var camper = {
-    RED: 'red',
-    BLACK: 'black',
-    assignCamp: function (firstCamp, player1, player2) {
-        if (firstCamp == this.RED) {
-            player1.camp = firstCamp;
-            player2.camp = this.BLACK;
-        } else if (firstCamp == this.BLACK) {
-            player1.camp = firstCamp;
-            player2.camp = this.RED;
-        }
-    },
-    getEnemy: function(allyCamp) {
-        if (allyCamp == this.RED) {
-            return this.BLACK;
-        } else if (allyCamp == this.BLACK) {
-            return this.RED;
-        }
-    }
-}*/
 var camper = require('./camper');
 
 function Piece(name, camp, x, y, cbMoveTo) {
@@ -152,9 +132,6 @@ function createPiecesFor(camp) {
     });
 }
 
-/*createPiecesFor('red');
-createPiecesFor('black');*/
-
 function popAPieceTo(x, y) {
     if (availablePieces.length > 0) {
         var piece = undefined;
@@ -171,23 +148,6 @@ function popAPieceTo(x, y) {
 
 var emptyColumn = Math.floor(columnsCount / 2);
 var emptyRow = rowsCount - 1;
-/*for (var i = 0; i < rowsCount; i++) {
-    board.push([]);
-    if (i == emptyRow) {
-        for (var j = 0; j < columnsCount; j++) {
-            board[i].push(createEmptyPieceAt(j, i));
-        }
-    } else {
-
-        for (var j = 0; j < columnsCount; j++) {
-            if (j == emptyColumn) {
-                board[i].push(createEmptyPieceAt(j, i));
-            } else {
-                board[i].push(popAPieceTo(j, i));
-            }
-        }
-    }
-}*/
 
 function Board(gameId){
     console.log('start renew board.');//***********

@@ -7,36 +7,67 @@ a {
   color: #00B7FF;
 }
 
+.buttons{text-align: right;}
+.button{
+    text-align: center;
+    height: 28px;
+    width: 66px;
+    margin-bottom: 15px;
+    margin-left: 16px;
+    border-radius: 10px;
+}
+.selected.button{
+  background-color: azure;
+}
+
+.players{
+  margin-bottom: 10px;
+}
+.player{
+  display: inline-block;
+    width: 106px;
+    height: 16px;
+    text-align: center;
+    padding: 0px;
+    border: 1px #EADBDB solid;
+    border-radius: 10px;
+    margin-right: 18px;
+    margin-left: 70px;
+}
+.playerBorder{
+  border: 3px aqua solid;
+}
+.red.player {
+    background-color: red;
+}
+.black.player {
+    background-color: #5D5A5A;
+}
+
 .cell {
 	position: absolute;
 	display: inline-block;
 	border: 1px solid black;
-    cursor: pointer;
-    background-color: #eee;
+  cursor: pointer;
+  background-color: #eee;
 }
-
 .discovered.cell {
     background-color: #fff;
     text-align: center;
     line-height: 50px;
 }
-
 .red.cell {
     color: red;
 }
-
 .black.cell {
     color: black;
 }
-
 .selected.cell {
     background-color: yellow;
 }
-
 .killed.cell {
     background-color: green;
 }
-
 .cell:hover {
     background-color: #ddd;
 }
