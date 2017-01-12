@@ -6,6 +6,7 @@ global.gameId = 0;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    req.session.refresh = true;//set the refresh flag for initial players in the same session
     if(req.session.gameId == undefined){
         req.session.gameId = global.gameId++;
     }
@@ -14,7 +15,6 @@ router.get('/', function(req, res, next) {
     if (req.session.board == undefined) {
         req.session.board = board;
         req.session.reqCount = 0;
-
     }
 
     console.log('session.reqcount: '+req.session.reqCount);//********

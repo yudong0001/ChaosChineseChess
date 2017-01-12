@@ -1,5 +1,6 @@
 var router = require('express').Router();
 var camper = require('../models/camper');
+//var aiPlayer = require('../models/AIPlayer');
 
 	var EMPTY_NAME = '空';
 
@@ -9,24 +10,17 @@ var camper = require('../models/camper');
         return rvalue;
     }
 
-    // AIPlayer 的难度依据 AI 是否知晓盘面全局（未翻开的棋子）划分。
-    var aiPlayer = {
-        camp: undefined,
-        testCouldMove: function(pieceMami, targetMami) {
-            /*var piece = getCellFromMami(pieceMami);
-            var target = getCellFromMami(targetMami);
-            return piece.canMoveTo(targetMami);*/
-            return piece.canMoveTo(target);
-        },
-        play: function(e) {
-            // 电脑检测有无已翻开的己方棋子并尝试走动。
-            /*var candidates = $('.' + this.camp + '.discovered:not(.empty)').get();
-            var targets = $('.discovered:not(.' + this.camp + ')').get();*/
+    function AIPlayer(){
+        this.camp = undefined;
+        // function testCouldMove(pieceMami, targetMami) {
+        //     return piece.canMoveTo(target);
+        // }
 
+        this.play = function(e){
+            // 电脑检测有无已翻开的己方棋子并尝试走动。
             var requ = e.req;
             var resp = e.res;
             var gameId = requ.session.gameId;
-            //var board = requ.session.board;
             var board = global.board[gameId];
             var rangeX = requ.session.board.columnsCount;
             var rangeY = requ.session.board.rowsCount-1;
@@ -48,7 +42,7 @@ var camper = require('../models/camper');
                         }
                     }
                 }
-            };
+            }
 
             //console.log('AIPlayer.candidates is: %o',candidates);//*************
             //console.log('AIPlayer.targets is: %o',targets);//************
@@ -114,7 +108,7 @@ var camper = require('../models/camper');
                         restPieces.push(board[i][j]);
                     }
                 }
-            };
+            }
             if (restPieces.length == 0 && restEnemies.length > 0) {
                 console.log('电脑认输');
                 resp.json({
@@ -126,34 +120,12 @@ var camper = require('../models/camper');
                     action:'pass',
                 });
             }
-        },
-    };//***AI Player***
+        };
+    }//object 'AIPlayer'
 
     function humanPlayer(){
-        this.selectedAlly = undefined,
-        this.camp= undefined,
-        this.tryMovePiece = function(resp,targetMami) {
-            var selected = this.selectedAlly;
-            var targetCell = targetMami;
-            var killer = selected;
-            var killed = targetCell;
-            if (selected.canMoveTo(targetCell)) {
-                selected.moveTo(targetCell);
-                this.selectedAlly = undefined;
-                console.log('人类' + this.camp+killer.name + ' KO ' +killed.camp+killed.name);//**********
-                resp.json({
-                    action:'kill',
-                    killer:killer,
-                    killed:killed
-                });
-                //aiPlayer.play(requ,resp);
-            } else {
-                console.log('不能这么走，你要去学一学中国象棋基本规则。');//************
-                resp.json({
-                    action:'canNotMove'
-                });
-            }
-        }
+        this.selectedAlly = undefined;
+        this.camp= undefined;
 
         this.play= function(e) {
             console.log('enter humanPlayer.play');//************
@@ -182,9 +154,9 @@ var camper = require('../models/camper');
                         if (this.camp == undefined) {
                             //assign camp to player1&player2
                             if(e.playMode=='humanAI'){
-                                camper.assignCamp(cell.camp, this, aiPlayer);
+                                camper.assignCamp(cell.camp, humanPlayer1, aiPlayer);
                             }else{
-                                camper.assignCamp(cell.camp, humanPlayer1, humanPlayer2);
+                                camper.assignCamp(cell.camp, humanPlayer2, humanPlayer3);
                             }
                             console.log('who is this after assignCamp: %o',this);//**************
                         }
@@ -209,8 +181,11 @@ var camper = require('../models/camper');
                     }
                 }
             } else {
+                var selected = this.selectedAlly;
                 if (cell.name == EMPTY_NAME) {
-                    this.tryMovePiece(resp,cell);
+                    if(tryMovePiece(resp,cell)){
+                        this.selectedAlly = undefined;
+                    }
                 } else {
                     if (cell.hidden) {
                         console.log('要翻开棋子，请取消当前选择的棋子。');
@@ -227,7 +202,6 @@ var camper = require('../models/camper');
                             });
                         } else {
                             console.log('切换选择。');
-                            //clicked.addClass('selected');
                             this.selectedAlly = cell;
                             resp.json({
                                 action:'xselect',
@@ -235,30 +209,71 @@ var camper = require('../models/camper');
                             });
                         }
                     } else {
-                        this.tryMovePiece(resp,cell);
+                        if(tryMovePiece(resp,cell)){
+                            this.selectedAlly = undefined;
+                        }
                     }
                 }
             }
-        }
-    };//***humanPlayer***
 
-    var humanPlayer1 = new humanPlayer();
-    var humanPlayer2 = new humanPlayer();
+            function tryMovePiece(resp,targetMami) {
+                var okToMove = false;
+                var targetCell = targetMami;
+                var killer = selected;
+                var killed = targetCell;
+                if (selected.canMoveTo(targetCell)) {
+                    okToMove = true;
+                    selected.moveTo(targetCell);
+                    console.log('人类' + this.camp+killer.name + ' KO ' +killed.camp+killed.name);//**********
+                    resp.json({
+                        action:'kill',
+                        killer:killer,
+                        killed:killed
+                    });
+                } else {
+                    console.log('不能这么走，你要去学一学中国象棋基本规则。');//************
+                    resp.json({
+                        action:'canNotMove'
+                    });
+                }
+                return okToMove;
+            }//function 'tryMovePiece'
+
+        };
+
+
+
+    }//***humanPlayer***
+
+    var aiPlayer = undefined;
+    var humanPlayer1 = undefined;
+    var humanPlayer2 = undefined;
+    var humanPlayer3 = undefined;
 
 router.post('/',function(req,res){
-	console.log('-----:'+req.body.player +':'+req.body.x+':gameId:'+req.session.gameId);//************
+	console.log('-----:'+req.body.player +':'+req.body.x+':gameId:'+req.session.gameId+':refresh flag:'+req.session.refresh);//************
     var playMode = req.body.playMode;
     if(req.body.playMode == "humanAI"){
+        if(req.session.refresh){
+            req.session.refresh = !req.session.refresh;
+            humanPlayer1 = new humanPlayer;
+            aiPlayer = new AIPlayer;
+        }
         if(req.body.player == "human"){
             humanPlayer1.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
         }else{
             aiPlayer.play({req:req ,res:res});
         }
     }else if(req.body.playMode == "human"){
+        if(req.session.refresh){
+            req.session.refresh = !req.session.refresh;
+            humanPlayer2=new humanPlayer;
+            humanPlayer3=new humanPlayer;
+        }
         if(req.body.player == "human"){
-            humanPlayer1.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
-        }else{
             humanPlayer2.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
+        }else{
+            humanPlayer3.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
         }
     }
     

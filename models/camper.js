@@ -1,7 +1,7 @@
 var RED = 'red';
 var BLACK = 'black';
-var assignCamp= function (firstCamp, player1, player2) {
 
+var assignCamp= function (firstCamp, player1, player2) {
     if (firstCamp == RED) {
         console.log('assign red to firstCamp.');//***********
         player1.camp = firstCamp;
@@ -12,6 +12,7 @@ var assignCamp= function (firstCamp, player1, player2) {
         player2.camp = RED;
     }
 };
+
 var getEnemy = function(allyCamp) {
     if (allyCamp == RED) {
         return BLACK;
