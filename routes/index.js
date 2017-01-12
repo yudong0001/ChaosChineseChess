@@ -6,10 +6,10 @@ global.gameId = 0;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    req.session.refresh = true;//set the refresh flag for initial players in the same session
     if(req.session.gameId == undefined){
         req.session.gameId = global.gameId++;
     }
+    req.session.refresh = req.session.gameId;//set the refresh flag for initial players in the same session
     var board = boardMami.Board(req.session.gameId);
     console.log('route:index.js: restart page ,grids[1][1]:%o',board.grids[1][1]);//********
     if (req.session.board == undefined) {

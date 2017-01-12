@@ -154,9 +154,9 @@ var camper = require('../models/camper');
                         if (this.camp == undefined) {
                             //assign camp to player1&player2
                             if(e.playMode=='humanAI'){
-                                camper.assignCamp(cell.camp, humanPlayer1, aiPlayer);
+                                camper.assignCamp(cell.camp, e.humanPlayer1, e.aiPlayer);
                             }else{
-                                camper.assignCamp(cell.camp, humanPlayer2, humanPlayer3);
+                                camper.assignCamp(cell.camp, e.humanPlayer1, e.humanPlayer2);
                             }
                             console.log('who is this after assignCamp: %o',this);//**************
                         }
@@ -245,35 +245,39 @@ var camper = require('../models/camper');
 
     }//***humanPlayer***
 
-    var aiPlayer = undefined;
-    var humanPlayer1 = undefined;
-    var humanPlayer2 = undefined;
+    var aiPlayer = [];
+    var humanPlayerX = [];
+    var humanPlayerY = [];
     var humanPlayer3 = undefined;
+    
 
 router.post('/',function(req,res){
 	console.log('-----:'+req.body.player +':'+req.body.x+':gameId:'+req.session.gameId+':refresh flag:'+req.session.refresh);//************
+    var gameId = req.session.gameId;
     var playMode = req.body.playMode;
     if(req.body.playMode == "humanAI"){
-        if(req.session.refresh){
-            req.session.refresh = !req.session.refresh;
-            humanPlayer1 = new humanPlayer;
-            aiPlayer = new AIPlayer;
+        if(req.session.refresh!=undefined&&req.session.refresh==gameId){
+            console.log('start to init players.');//*******
+            req.session.refresh = undefined;
+            humanPlayerX[gameId] = new humanPlayer;
+            aiPlayer[gameId] = new AIPlayer;
         }
+        console.log('humanPlayers:%o',humanPlayerX);//*********
         if(req.body.player == "human"){
-            humanPlayer1.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
+            humanPlayerX[gameId].play({ req:req ,res:res ,playMode:playMode ,humanPlayer1:humanPlayerX[gameId] ,aiPlayer:aiPlayer[gameId] ,posx:req.body.x ,posy:req.body.y });
         }else{
-            aiPlayer.play({req:req ,res:res});
+            aiPlayer[gameId].play({req:req ,res:res});
         }
     }else if(req.body.playMode == "human"){
-        if(req.session.refresh){
-            req.session.refresh = !req.session.refresh;
-            humanPlayer2=new humanPlayer;
-            humanPlayer3=new humanPlayer;
+        if(req.session.refresh!=undefined&&req.session.refresh == gameId){
+            req.session.refresh = undefined;;
+            humanPlayerX[gameId] = new humanPlayer;
+            humanPlayerY[gameId] = new humanPlayer;
         }
         if(req.body.player == "human"){
-            humanPlayer2.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
+            humanPlayerX[gameId].play({ req:req ,res:res ,playMode:playMode ,humanPlayer1:humanPlayerX[gameId] ,humanPlayer2:humanPlayerY[gameId] ,posx:req.body.x ,posy:req.body.y });
         }else{
-            humanPlayer3.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
+            humanPlayerY[gameId].play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
         }
     }
     
