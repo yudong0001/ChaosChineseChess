@@ -2,22 +2,41 @@ var router = require('express').Router();
 // var board = require('../models/board').Board();
 var boardMami = require('../models/board');
 
-global.gameId = 0;
-
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    if(req.session.gameId == undefined){
-        req.session.gameId = global.gameId++;
+    console.log('session gen id:'+req.session.genid);//*********
+    if(global.gameId == undefined){
+        global.gameId = 0;
+        global.gameX = new Array;
     }
-    req.session.refresh = req.session.gameId;//set the refresh flag for initial players in the same session
-    var board = boardMami.Board(req.session.gameId);
-    console.log('route:index.js: restart page ,grids[1][1]:%o',board.grids[1][1]);//********
-    if (req.session.board == undefined) {
-        req.session.board = board;
-        req.session.reqCount = 0;
-    }
+    var gameId = global.gameId;
+    // if(req.session.gameId == undefined){
+    //     req.session.gameId = global.gameId++;
+    // }
+    req.session.gameId = global.gameId++;
+    console.log('route:index.js.session.gameId: '+req.session.gameId);//********
 
-    console.log('session.reqcount: '+req.session.reqCount);//********
+    var board = boardMami.Board(req.session.gameId);
+    if(!global.gameX[gameId]){
+        global.gameX[gameId] = new Object;
+    }
+    global.gameX[gameId].board = board;
+    global.gameX[gameId].playerX = new Object;
+    global.gameX[gameId].playerY = new Object;
+    console.log('route.index:global.gameX:%o',global.gameX);//********
+
+    //var board = undefined;
+    if (req.session.board == undefined) {
+        req.session.reqCount = 0;
+        //board = boardMami.Board(req.session.reqCount);
+        req.session.board = board;
+    }else{
+        //board = boardMami.Board(req.session.reqCount);
+    }
+    console.log('route:index.js: restart page ,grids[1][1]:%o',board.grids[1][1]);//********
+
+    req.session.refresh = req.session.gameId;//set the refresh flag for initial players in the same session
+    console.log('route:index.js.session.reqCount: '+req.session.reqCount);//********
     
     req.session.reqCount++;
     res.render('index', {

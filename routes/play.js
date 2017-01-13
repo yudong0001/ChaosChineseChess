@@ -21,7 +21,7 @@ var camper = require('../models/camper');
             var requ = e.req;
             var resp = e.res;
             var gameId = requ.session.gameId;
-            var board = global.board[gameId];
+            var board = global.gameX[gameId].board.grids;
             var rangeX = requ.session.board.columnsCount;
             var rangeY = requ.session.board.rowsCount-1;
             var candidates = [];
@@ -129,20 +129,25 @@ var camper = require('../models/camper');
 
         this.play= function(e) {
             console.log('enter humanPlayer.play');//************
+            console.log('global.gameX:%o',global.gameX);//********
             
             var requ = e.req;
             var resp = e.res;
             var cellpos = {x:e.posx ,y:e.posy};
             var gameId = requ.session.gameId;
+            var player1 = global.gameX[gameId].playerX;
+            var player2 = global.gameX[gameId].playerY;
             //var board = requ.session.board;
-            var board = global.board[gameId];
+            //var board = global.board[gameId];
+            var board = global.gameX[gameId].board.grids;
             var cell = board[cellpos.y][cellpos.x];
 
-            console.log('global.board[gameId][1]: %o',board[3][8]);//*******
-            console.log('get req cell from global board: %o',cell);//***************
+            console.log('humanPlay:global.gameX.board[3][8]: %o',board[3][8]);//*******
+            console.log('humanPlay:get req cell from global board: %o',cell);//***************
             console.log('who is this in humanPlayer.play: %o',this);//**************
 
 
+            // if (this.selectedAlly == undefined) {
             if (this.selectedAlly == undefined) {
                 if (cell.name == EMPTY_NAME) {
                     console.log('点击空地。');//*************
@@ -154,9 +159,9 @@ var camper = require('../models/camper');
                         if (this.camp == undefined) {
                             //assign camp to player1&player2
                             if(e.playMode=='humanAI'){
-                                camper.assignCamp(cell.camp, e.humanPlayer1, e.aiPlayer);
+                                camper.assignCamp(cell.camp, player1, player2);
                             }else{
-                                camper.assignCamp(cell.camp, e.humanPlayer1, e.humanPlayer2);
+                                camper.assignCamp(cell.camp, player1, player2);
                             }
                             console.log('who is this after assignCamp: %o',this);//**************
                         }
@@ -245,39 +250,43 @@ var camper = require('../models/camper');
 
     }//***humanPlayer***
 
-    var aiPlayer = [];
-    var humanPlayerX = [];
-    var humanPlayerY = [];
-    var humanPlayer3 = undefined;
+    // var aiPlayer = [];
+    // var humanPlayerX = [];
+    // var humanPlayerY = [];
+    // var humanPlayer3 = undefined;
     
 
 router.post('/',function(req,res){
 	console.log('-----:'+req.body.player +':'+req.body.x+':gameId:'+req.session.gameId+':refresh flag:'+req.session.refresh);//************
     var gameId = req.session.gameId;
     var playMode = req.body.playMode;
+
+    console.log('play:global.gameX:%o',global.gameX[gameId]);//*********
+
     if(req.body.playMode == "humanAI"){
         if(req.session.refresh!=undefined&&req.session.refresh==gameId){
             console.log('start to init players.');//*******
             req.session.refresh = undefined;
-            humanPlayerX[gameId] = new humanPlayer;
-            aiPlayer[gameId] = new AIPlayer;
+            global.gameX[gameId].playerX = new humanPlayer;
+            global.gameX[gameId].playerY = new AIPlayer;
         }
-        console.log('humanPlayers:%o',humanPlayerX);//*********
+        console.log('play:humanPlayer1:%o',global.gameX[gameId].playerX);//*********
+
         if(req.body.player == "human"){
-            humanPlayerX[gameId].play({ req:req ,res:res ,playMode:playMode ,humanPlayer1:humanPlayerX[gameId] ,aiPlayer:aiPlayer[gameId] ,posx:req.body.x ,posy:req.body.y });
+            global.gameX[gameId].playerX.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
         }else{
-            aiPlayer[gameId].play({req:req ,res:res});
+            global.gameX[gameId].playerY.play({req:req ,res:res});
         }
     }else if(req.body.playMode == "human"){
         if(req.session.refresh!=undefined&&req.session.refresh == gameId){
             req.session.refresh = undefined;;
-            humanPlayerX[gameId] = new humanPlayer;
-            humanPlayerY[gameId] = new humanPlayer;
+            global.gameX[gameId].playerX = new humanPlayer;
+            global.gameX[gameId].playerY = new humanPlayer;
         }
         if(req.body.player == "human"){
-            humanPlayerX[gameId].play({ req:req ,res:res ,playMode:playMode ,humanPlayer1:humanPlayerX[gameId] ,humanPlayer2:humanPlayerY[gameId] ,posx:req.body.x ,posy:req.body.y });
+            global.gameX[gameId].playerX.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
         }else{
-            humanPlayerY[gameId].play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
+            global.gameX[gameId].playerY.play({ req:req ,res:res ,playMode:playMode ,posx:req.body.x ,posy:req.body.y });
         }
     }
     
