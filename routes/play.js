@@ -1,6 +1,11 @@
 var router = require('express').Router();
 var camper = require('../models/camper');
-//var aiPlayer = require('../models/AIPlayer');
+
+var jiangNormal = function(piece){
+    var dx = Math.abs(this.x - piece.x);
+    var dy = Math.abs(this.y - piece.y);
+    return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
+}
 
 	var EMPTY_NAME = '空';
 
@@ -12,6 +17,8 @@ var camper = require('../models/camper');
 
     function AIPlayer(){
         this.camp = undefined;
+        this.superJiang = true;
+        this.jiangStepChange = true;
         // function testCouldMove(pieceMami, targetMami) {
         //     return piece.canMoveTo(target);
         // }
@@ -21,6 +28,7 @@ var camper = require('../models/camper');
             var requ = e.req;
             var resp = e.res;
             var gameId = requ.session.gameId;
+            var gameX = global.gameX[gameId];
             var board = global.gameX[gameId].board.grids;
             var rangeX = requ.session.board.columnsCount;
             var rangeY = requ.session.board.rowsCount-1;
@@ -49,10 +57,8 @@ var camper = require('../models/camper');
 
             for (var i = 0; i < candidates.length; i++) {
                 var candCell = candidates[i];
-
                 for (var j = 0; j < targets.length; j++) {
-                    var tarCell = targets[j];
-
+                    var tarCell = targets[j]; 
                     if (candCell.canMoveTo(tarCell)) {
                         validMovements.push({pieceMami:candCell, targetMami:tarCell});
                     }
@@ -61,6 +67,13 @@ var camper = require('../models/camper');
             if (validMovements.length > 0) {
                 var piece = validMovements[0].pieceMami;
                 var target = validMovements[0].targetMami;
+                /*if(piece.name == '将'&&this.superJiang){this.superJiang = false;}
+                if(jiangStepChange&&piece.name == '将'&&!this.superJiang){*/
+                if(this.jiangStepChange&&piece.name == '将'){
+                    console.log('AI:start to change the step method for jiang.');//******
+                    this.jiangStepChange = false;
+                    piece.canMoveTo = jiangNormal;
+                }
                 console.log('电脑的' + this.camp+piece.name + ' KO ' +target.camp+target.name);
                 piece.moveTo(target);
                 resp.json({
@@ -126,6 +139,8 @@ var camper = require('../models/camper');
     function humanPlayer(){
         this.selectedAlly = undefined;
         this.camp= undefined;
+        this.superJiang = true;
+        this.jiangStepChange = true;
 
         this.play= function(e) {
             console.log('enter humanPlayer.play');//************
@@ -135,6 +150,7 @@ var camper = require('../models/camper');
             var resp = e.res;
             var cellpos = {x:e.posx ,y:e.posy};
             var gameId = requ.session.gameId;
+            var gameX = global.gameX[gameId];
             var player1 = global.gameX[gameId].playerX;
             var player2 = global.gameX[gameId].playerY;
             //var board = requ.session.board;
@@ -188,8 +204,12 @@ var camper = require('../models/camper');
             } else {
                 var selected = this.selectedAlly;
                 if (cell.name == EMPTY_NAME) {
-                    if(tryMovePiece(resp,cell)){
+                    var result = tryMovePiece(resp,this.jiangStepChange,cell);
+                    if(result.okToMove){
                         this.selectedAlly = undefined;
+                        if(this.jiangStepChange){
+                            this.jiangStepChange = result.jsc;
+                        }
                     }
                 } else {
                     if (cell.hidden) {
@@ -214,22 +234,34 @@ var camper = require('../models/camper');
                             });
                         }
                     } else {
-                        if(tryMovePiece(resp,cell)){
+                        var result = tryMovePiece(resp,this.jiangStepChange,cell);
+                        if(result.okToMove){
                             this.selectedAlly = undefined;
+                            if(this.jiangStepChange){
+                                this.jiangStepChange = result.jsc;
+                            }
                         }
                     }
                 }
             }
 
-            function tryMovePiece(resp,targetMami) {
+            function tryMovePiece(resp,jiangStepChange,targetMami) {
                 var okToMove = false;
+                var jsc = jiangStepChange;
                 var targetCell = targetMami;
                 var killer = selected;
                 var killed = targetCell;
+                console.log('人类:killer:%o KO %o',killer ,killed);//**********
+
                 if (selected.canMoveTo(targetCell)) {
                     okToMove = true;
+                    console.log('prepare changing method for jiang step.'+jsc+':'+selected.name);//********
+                    if(jsc&&selected.name == '将'){
+                        console.log('start change method for jiang step.');//********
+                        jsc = false;
+                        selected.canMoveTo = jiangNormal;
+                    }
                     selected.moveTo(targetCell);
-                    console.log('人类' + this.camp+killer.name + ' KO ' +killed.camp+killed.name);//**********
                     resp.json({
                         action:'kill',
                         killer:killer,
@@ -241,7 +273,7 @@ var camper = require('../models/camper');
                         action:'canNotMove'
                     });
                 }
-                return okToMove;
+                return {okToMove:okToMove,jsc:jsc};
             }//function 'tryMovePiece'
 
         };

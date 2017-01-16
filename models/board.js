@@ -28,6 +28,7 @@ function Piece(name, camp, x, y, cbMoveTo) {
     }
 
     this.moveTo = function(anotherPiece) {
+        console.log('piece.moveTo:who is this? %o',this);//*******
         if (anotherPiece.name == EMPTY_NAME) {
             replaceTarget(anotherPiece, this);
         }else {
@@ -36,7 +37,7 @@ function Piece(name, camp, x, y, cbMoveTo) {
             replaceTarget(anotherPiece, this);
         }
     };
-}
+}//class 'piece'
 
 function createEmptyPieceAt(x, y) {
     var p = new Piece(EMPTY_NAME, undefined, x, y, undefined);
@@ -102,6 +103,7 @@ var piecesDesc = {
     '炮': {count:2, cbMoveTo:function(piece){
         if (isInStraightLine(this, piece)) {
             var count = obstaclesCountOnStraightLine(this, piece);
+            console.log('count for piece"Cannon":obstaclesCountOnStraightLine(this, piece):'+count);//*******
             return (piece.camp == undefined && count == 0) || (piece.camp != undefined && count == 1);
         }
         return false;
@@ -109,7 +111,16 @@ var piecesDesc = {
     '将': {count:1, cbMoveTo:function(piece){
         var dx = Math.abs(this.x - piece.x);
         var dy = Math.abs(this.y - piece.y);
-        return (dx == 1 && (dy == 1 || dy == 0)) || (dx == 0 && dy == 1);
+        //return (dx == 1 && (dy == 1 || dy == 0)) || (dx == 0 && dy == 1);
+         if (isInStraightLine(this, piece)) {
+            var count = obstaclesCountOnStraightLine(this, piece);
+            return (piece.camp == undefined && count == 0) || (piece.camp != undefined && (count == 1 || count == 0));
+        }//for 车和炮
+
+         return ( dx == 2 && dy == 2 && board[(this.y + piece.y) / 2][(this.x + piece.x) / 2].name == EMPTY_NAME ) ||
+                ((dx == 1 && dy == 2 && board[(this.y + piece.y) / 2][this.x].name == EMPTY_NAME) ||
+                (dx == 2 && dy == 1 && board[this.y][(this.x + piece.x) / 2].name == EMPTY_NAME))||
+                ((dx == 1 && (dy == 1 || dy == 0)) || (dx == 0 && dy == 1));
     }},
     '兵': {count:5, cbMoveTo:function(piece){
         var dx = Math.abs(this.x - piece.x);
