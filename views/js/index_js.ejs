@@ -120,7 +120,9 @@ $(document).ready(function(){
                 case 'kill':
                     $('#cell'+data.killer.y+data.killer.x).addClass('selected');
                     $('#cell'+data.killed.y+data.killed.x).addClass('killed');
-                    if(playMode == 'humanAI'&&enemy)wTime = 800;
+                    if(playMode == 'humanAI'&&enemy){
+                        wTime = 500;
+                    }
                     setTimeout(function(){
                         updateCell(data.killer);
                         updateCell(data.killed);

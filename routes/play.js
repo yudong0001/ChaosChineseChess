@@ -17,7 +17,7 @@ var jiangNormal = function(piece){
 
     function AIPlayer(){
         this.camp = undefined;
-        this.superJiang = true;
+        //this.superJiang = true;
         this.jiangStepChange = true;
         // function testCouldMove(pieceMami, targetMami) {
         //     return piece.canMoveTo(target);
@@ -29,9 +29,10 @@ var jiangNormal = function(piece){
             var resp = e.res;
             var gameId = requ.session.gameId;
             var gameX = global.gameX[gameId];
-            var board = global.gameX[gameId].board.grids;
-            var rangeX = requ.session.board.columnsCount;
-            var rangeY = requ.session.board.rowsCount-1;
+
+            var board = gameX.board.grids;
+            var rangeX = gameX.board.columnsCount;
+            var rangeY = gameX.board.rowsCount-1;
             var candidates = [];
             var targets = [];
             var validMovements = [];
@@ -43,7 +44,7 @@ var jiangNormal = function(piece){
                 for(var j=0;j<rangeX;j++){//column number
                     //console.log('for AI candi&target ,current cell discoverd:%o',board[i][j]);//*******
                     if(!board[i][j].hidden && board[i][j].name!=EMPTY_NAME ){
-                        if(board[i][j].camp==this.camp){
+                        if(board[i][j].camp == this.camp){
                             candidates.push(board[i][j]);
                         }else{
                             targets.push(board[i][j]);
@@ -65,8 +66,9 @@ var jiangNormal = function(piece){
                 }
             }
             if (validMovements.length > 0) {
-                var piece = validMovements[0].pieceMami;
-                var target = validMovements[0].targetMami;
+                var rv = randomInt(validMovements.length);
+                var piece = validMovements[rv].pieceMami;
+                var target = validMovements[rv].targetMami;
                 /*if(piece.name == '将'&&this.superJiang){this.superJiang = false;}
                 if(jiangStepChange&&piece.name == '将'&&!this.superJiang){*/
                 if(this.jiangStepChange&&piece.name == '将'){
@@ -96,7 +98,7 @@ var jiangNormal = function(piece){
                     }
                 }
             }
-            console.log('ai.undiscovered length: %o',undiscovered.length);//***********
+            console.log('ai.undiscovered length: '+undiscovered.length);//***********
 
             if (undiscovered.length > 0) {
                 console.log('start to discover a cell by AI.');//**********
@@ -127,7 +129,12 @@ var jiangNormal = function(piece){
                 resp.json({
                     action:'finished',
                 });
-            } else {
+            } else if (restPieces.length > 0 && restEnemies.length == 0){
+                console.log('Human 输了！');
+                resp.json({
+                    action:'finished',
+                });
+            }else {
                 console.log('电脑 Pass 一步');
                 resp.json({
                     action:'pass',
@@ -139,7 +146,6 @@ var jiangNormal = function(piece){
     function humanPlayer(){
         this.selectedAlly = undefined;
         this.camp= undefined;
-        this.superJiang = true;
         this.jiangStepChange = true;
 
         this.play= function(e) {
@@ -151,35 +157,36 @@ var jiangNormal = function(piece){
             var cellpos = {x:e.posx ,y:e.posy};
             var gameId = requ.session.gameId;
             var gameX = global.gameX[gameId];
-            var player1 = global.gameX[gameId].playerX;
-            var player2 = global.gameX[gameId].playerY;
+
+            var playerX = gameX.playerX;
+            var playerY = gameX.playerY;
             //var board = requ.session.board;
             //var board = global.board[gameId];
-            var board = global.gameX[gameId].board.grids;
+            var board = gameX.board.grids;
             var cell = board[cellpos.y][cellpos.x];
 
-            console.log('humanPlay:global.gameX.board[3][8]: %o',board[3][8]);//*******
-            console.log('humanPlay:get req cell from global board: %o',cell);//***************
-            console.log('who is this in humanPlayer.play: %o',this);//**************
+            console.log('humanPlay:global.gameX.board[3][8]: %o'+board[3][8].camp+board[3][8].name);//*******
+            console.log('humanPlay:get req cell from global board: '+cell.camp+cell.name);//***************
+            console.log('who is this in humanPlayer.play: '+this.camp);//**************
 
 
-            // if (this.selectedAlly == undefined) {
             if (this.selectedAlly == undefined) {
                 if (cell.name == EMPTY_NAME) {
                     console.log('点击空地。');//*************
                     resp.json();
+                    return;
                 } else {
                     if (cell.hidden) {
-                        console.log('翻开一颗 ' + cell.camp + ' 棋子。');//**********
+                        console.log('翻开一颗 ' + cell.camp + cell.name);//**********
 
                         if (this.camp == undefined) {
                             //assign camp to player1&player2
                             if(e.playMode=='humanAI'){
-                                camper.assignCamp(cell.camp, player1, player2);
+                                camper.assignCamp(cell.camp, playerX, playerY);
                             }else{
-                                camper.assignCamp(cell.camp, player1, player2);
+                                camper.assignCamp(cell.camp, playerX, playerY);
                             }
-                            console.log('who is this after assignCamp: %o',this);//**************
+                            console.log('who is this after assignCamp: %o'+this.camp);//**************
                         }
                         cell.hidden = false;
                         resp.json({
@@ -187,17 +194,20 @@ var jiangNormal = function(piece){
                             cell:cell
                         });
                         //aiPlayer.play();
+                        return;
                     } else {
                         if (this.camp == cell.camp) {
-                            console.log('选择一颗己方 ' + cell.camp + ' 棋子。');
+                            console.log('选择一颗己方 ' + cell.camp + cell.name);//*********
                             this.selectedAlly = cell;
                             resp.json({
                                 action:'select',
                                 cell:cell
                             });
+                            return;
                         } else {
-                            console.log('敌方棋子，无法选择。');
+                            console.log('敌方棋子，无法选择。'+ cell.camp + cell.name);//*********
                             resp.json();
+                            return;
                         }
                     }
                 }
@@ -213,25 +223,27 @@ var jiangNormal = function(piece){
                     }
                 } else {
                     if (cell.hidden) {
-                        console.log('要翻开棋子，请取消当前选择的棋子。');
+                        console.log('要翻开棋子，请取消当前选择的棋子。');//*******
                         resp.json();
                         return;
                     }
                     if (cell.camp == this.camp) {
                         if (this.selectedAlly == cell) {
-                            console.log('取消选择。');
+                            console.log('取消选择。');//*******
                             this.selectedAlly = undefined;
                             resp.json({
                                 action:'unselect',
                                 cell:cell
                             });
+                            return;
                         } else {
-                            console.log('切换选择。');
+                            console.log('切换选择。');//*******
                             this.selectedAlly = cell;
                             resp.json({
                                 action:'xselect',
                                 cell:cell
                             });
+                            return;
                         }
                     } else {
                         var result = tryMovePiece(resp,this.jiangStepChange,cell);
@@ -241,6 +253,7 @@ var jiangNormal = function(piece){
                                 this.jiangStepChange = result.jsc;
                             }
                         }
+                        return;
                     }
                 }
             }
@@ -251,7 +264,7 @@ var jiangNormal = function(piece){
                 var targetCell = targetMami;
                 var killer = selected;
                 var killed = targetCell;
-                console.log('人类:killer:%o KO %o',killer ,killed);//**********
+                console.log('人类:killer:%o KO %o'+killer.camp+killer.name+':'+killed.camp+killed.name);//**********
 
                 if (selected.canMoveTo(targetCell)) {
                     okToMove = true;
@@ -289,7 +302,7 @@ var jiangNormal = function(piece){
     
 
 router.post('/',function(req,res){
-	console.log('-----:'+req.body.player +':'+req.body.x+':gameId:'+req.session.gameId+':refresh flag:'+req.session.refresh);//************
+	console.log('-----:'+req.body.player +':'+req.body.x+':gameId:'+req.session.gameId+':refresh flag:'+req.session.refresh);//*******
     var gameId = req.session.gameId;
     var playMode = req.body.playMode;
 

@@ -64,6 +64,7 @@ function obstaclesCountOnStraightLine(p1, p2) {
         }
         for (var i = lowLimit + 1; i < upLimit; i++) {
             if (board[i][p1.x].name != EMPTY_NAME) {
+                console.log('board.obstacles.board[i][p1.x]:%o',board[i][p1.x]);//*******
                 count++;
             }
         }
@@ -76,6 +77,7 @@ function obstaclesCountOnStraightLine(p1, p2) {
         }
         for (var i = lowLimit + 1; i < upLimit; i++) {
             if (board[p1.y][i].name != EMPTY_NAME) {
+                console.log('board.obstacles.board[p1.y][i]:%o',board[p1.y][i]);//*******
                 count++;
             }
         }
@@ -163,6 +165,7 @@ var emptyRow = rowsCount - 1;
 function Board(gameId){
     console.log('start renew board.');//***********
     board = [];
+    availablePieces = [];
     createPiecesFor('red');
     createPiecesFor('black');
     for (var i = 0; i < rowsCount; i++) {
@@ -185,6 +188,7 @@ function Board(gameId){
     
     global.board[gameId] = [];
     global.board[gameId] = board;
+    
     return {
         grids: board,
         columnsCount: columnsCount,
