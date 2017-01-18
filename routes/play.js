@@ -214,7 +214,7 @@ var jiangNormal = function(piece, cboard){
             } else {
                 var selected = this.selectedAlly;
                 if (cell.name == EMPTY_NAME) {
-                    var result = tryMovePiece(resp, this.jiangStepChange, cell, cboard);
+                    var result = tryMovePiece(resp, this.jiangStepChange, cell, board);
                     if(result.okToMove){
                         this.selectedAlly = undefined;
                         if(this.jiangStepChange){
@@ -246,7 +246,7 @@ var jiangNormal = function(piece, cboard){
                             return;
                         }
                     } else {
-                        var result = tryMovePiece(resp, this.jiangStepChange, cell, cboard);
+                        var result = tryMovePiece(resp, this.jiangStepChange, cell, board);
                         if(result.okToMove){
                             this.selectedAlly = undefined;
                             if(this.jiangStepChange){
