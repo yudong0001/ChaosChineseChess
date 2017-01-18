@@ -9,14 +9,14 @@ var deadPieces = [];
 
 var camper = require('./camper');
 
-function Piece(name, camp, x, y, cbMoveTo) {
+function Piece(name, camp, weight,x, y, cbMoveTo) {
     this.name = name;
     this.camp = camp;
-    //this.weight = weight;
+    this.weight = weight;
     this.x = x;
     this.y = y;
-    this.hidden = true;
     this.canMoveTo = cbMoveTo;
+    this.hidden = true;
 
     function replaceTarget(target, source) {
         target.name = source.name;
@@ -41,7 +41,7 @@ function Piece(name, camp, x, y, cbMoveTo) {
 }//class 'piece'
 
 function createEmptyPieceAt(x, y) {
-    var p = new Piece(EMPTY_NAME, undefined, x, y, undefined);
+    var p = new Piece(EMPTY_NAME, undefined, undefined, x, y, undefined);
     p.hidden = false;
     return p;
 }
@@ -141,7 +141,7 @@ var availablePieces = [];
 
 function createPiece(camp, name, desc) {
     for (var i = 0; i < desc.count; i++) {
-        availablePieces.push({camp: camp, name: name, cb: desc.cbMoveTo});
+        availablePieces.push({camp: camp, name: name, weight: desc.weight, cb: desc.cbMoveTo});
     }
 }
 
@@ -159,7 +159,7 @@ function popAPieceTo(x, y) {
         } else {
             piece = availablePieces.splice(randomInt(availablePieces.length), 1)[0];
         }
-        return new Piece(piece.name, piece.camp, x, y, piece.cb);
+        return new Piece(piece.name, piece.camp, piece.weight, x, y, piece.cb);
     } else {
         return createEmptyPieceAt(x, y);
     }
