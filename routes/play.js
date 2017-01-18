@@ -1,7 +1,7 @@
 var router = require('express').Router();
 var camper = require('../models/camper');
 
-var jiangNormal = function(piece){
+var jiangNormal = function(piece, cboard){
     var dx = Math.abs(this.x - piece.x);
     var dy = Math.abs(this.y - piece.y);
     return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
@@ -60,7 +60,7 @@ var jiangNormal = function(piece){
                 var candCell = candidates[i];
                 for (var j = 0; j < targets.length; j++) {
                     var tarCell = targets[j]; 
-                    if (candCell.canMoveTo(tarCell)) {
+                    if (candCell.canMoveTo(tarCell, board)) {
                         validMovements.push({pieceMami:candCell, targetMami:tarCell});
                     }
                 }
@@ -214,7 +214,7 @@ var jiangNormal = function(piece){
             } else {
                 var selected = this.selectedAlly;
                 if (cell.name == EMPTY_NAME) {
-                    var result = tryMovePiece(resp,this.jiangStepChange,cell);
+                    var result = tryMovePiece(resp, this.jiangStepChange, cell, cboard);
                     if(result.okToMove){
                         this.selectedAlly = undefined;
                         if(this.jiangStepChange){
@@ -246,7 +246,7 @@ var jiangNormal = function(piece){
                             return;
                         }
                     } else {
-                        var result = tryMovePiece(resp,this.jiangStepChange,cell);
+                        var result = tryMovePiece(resp, this.jiangStepChange, cell, cboard);
                         if(result.okToMove){
                             this.selectedAlly = undefined;
                             if(this.jiangStepChange){
@@ -258,7 +258,8 @@ var jiangNormal = function(piece){
                 }
             }
 
-            function tryMovePiece(resp,jiangStepChange,targetMami) {
+            function tryMovePiece(resp, jiangStepChange, targetMami, cboard) {
+                var cboard = cboard;
                 var okToMove = false;
                 var jsc = jiangStepChange;
                 var targetCell = targetMami;
@@ -266,7 +267,7 @@ var jiangNormal = function(piece){
                 var killed = targetCell;
                 console.log('人类:killer:%o KO %o'+killer.camp+killer.name+':'+killed.camp+killed.name);//**********
 
-                if (selected.canMoveTo(targetCell)) {
+                if (selected.canMoveTo(targetCell, cboard)) {
                     okToMove = true;
                     console.log('prepare changing method for jiang step.'+jsc+':'+selected.name);//********
                     if(jsc&&selected.name == '将'){
