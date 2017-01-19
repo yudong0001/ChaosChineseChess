@@ -36,6 +36,9 @@ var jiangNormal = function(piece, cboard){
             var candidates = [];
             var targets = [];
             var validMovements = [];
+            var freeWalk = [];
+            var noneToKill = true;
+            var allShow = false;
 
             console.log('entr AIPlayer.play ,board[0][0] is: %o' ,board[0][0]);//***********
 
@@ -43,7 +46,8 @@ var jiangNormal = function(piece, cboard){
             for (var i = rangeY - 1; i >= 0; i--) {//row number
                 for(var j=0;j<rangeX;j++){//column number
                     //console.log('for AI candi&target ,current cell discoverd:%o',board[i][j]);//*******
-                    if(!board[i][j].hidden && board[i][j].name!=EMPTY_NAME ){
+                    //if(!board[i][j].hidden && board[i][j].name!=EMPTY_NAME ){
+                    if(!board[i][j].hidden){
                         if(board[i][j].camp == this.camp){
                             candidates.push(board[i][j]);
                         }else{
@@ -61,21 +65,43 @@ var jiangNormal = function(piece, cboard){
                 for (var j = 0; j < targets.length; j++) {
                     var tarCell = targets[j]; 
                     if (candCell.canMoveTo(tarCell, board)) {
-                        validMovements.push({pieceMami:candCell, targetMami:tarCell});
+                        console.log('canMoveTo:tarCell.weight:'+tarCell.weight);//********
+                        if(tarCell.weight<10){
+                            validMovements.push({pieceMami:candCell, targetMami:tarCell});
+                        }else{
+                            freeWalk.push({pieceMami:candCell, targetMami:tarCell});
+                        }
                     }
                 }
             }
             if (validMovements.length > 0) {
-                var rv = randomInt(validMovements.length);
-                var piece = validMovements[rv].pieceMami;
+                //var rv = randomInt(validMovements.length);
+                //var piece = validMovements[rv].pieceMami;
+                //var target = validMovements[rv].targetMami;
+                var rv = 0;
                 var target = validMovements[rv].targetMami;
+
+                console.log('AI.play:target.weight:'+target.weight);//*******
+                if (validMovements.length > 1){
+                    for(var i = 1; i < validMovements.length; i++){
+                        if(target.weight > validMovements[i].targetMami.weight){
+                            rv = i;
+                            target = validMovements[rv].targetMami;
+                        }
+                        console.log('AI.play.validMovements:target.weight:'+target.weight);//*******
+                    }
+                }
+                var piece = validMovements[rv].pieceMami;
+                
                 /*if(piece.name == '将'&&this.superJiang){this.superJiang = false;}
                 if(jiangStepChange&&piece.name == '将'&&!this.superJiang){*/
                 if(this.jiangStepChange&&piece.name == '将'){
                     console.log('AI:start to change the step method for jiang.');//******
                     this.jiangStepChange = false;
                     piece.canMoveTo = jiangNormal;
+                    piece.weight = 6;
                 }
+
                 console.log('电脑的' + this.camp+piece.name + ' KO ' +target.camp+target.name);
                 piece.moveTo(target);
                 resp.json({
@@ -124,6 +150,7 @@ var jiangNormal = function(piece, cboard){
                     }
                 }
             }
+
             if (restPieces.length == 0 && restEnemies.length > 0) {
                 console.log('电脑认输');
                 resp.json({
@@ -135,10 +162,33 @@ var jiangNormal = function(piece, cboard){
                     action:'finished',
                 });
             }else {
-                console.log('电脑 Pass 一步');
-                resp.json({
+                console.log('电脑 freeWalk');//*******
+                if (freeWalk.length > 0) {
+                    var rv = randomInt(freeWalk.length);
+                    var piece = freeWalk[rv].pieceMami;
+                    var target = freeWalk[rv].targetMami;
+               
+                    if(this.jiangStepChange&&piece.name == '将'){
+                        console.log('AI:start to change the step method for jiang.');//******
+                        this.jiangStepChange = false;
+                        piece.canMoveTo = jiangNormal;
+                        piece.weight = 6;
+                    }
+                    console.log('电脑的' + this.camp+piece.name + ' freeWalk to ' +target.camp+target.name);
+                    piece.moveTo(target);
+                    resp.json({
+                        action:'kill',
+                        killer:piece,
+                        killed:target
+                    });
+                    return;
+                }else{
+                    console.log('电脑 pass 一步');//*******
+                    resp.json({
                     action:'pass',
                 });
+                }
+                
             }
         };
     }//object 'AIPlayer'

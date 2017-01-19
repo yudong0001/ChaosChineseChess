@@ -1,6 +1,9 @@
 global.board = [];
 
 var EMPTY_NAME = '空';
+var EMPTY_CAMP = 'GRAY';
+var EMPTY_WEIGHT = 100;
+
 var rowsCount = 5;
 var columnsCount = 9;
 
@@ -21,10 +24,12 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
     function replaceTarget(target, source) {
         target.name = source.name;
         target.camp = source.camp;
+        target.weight = source.weight;
         target.canMoveTo = source.canMoveTo;
 
         source.name = EMPTY_NAME;
         source.camp = undefined;
+        source.weight = EMPTY_WEIGHT;
         source.canMoveTo = undefined;
     }
 
@@ -33,7 +38,7 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
         if (anotherPiece.name == EMPTY_NAME) {
             replaceTarget(anotherPiece, this);
         }else {
-            deadPieces.push(Piece(anotherPiece.name, anotherPiece.camp,
+            deadPieces.push(Piece(anotherPiece.name, anotherPiece.camp, anotherPiece.weight,
                 anotherPiece.x, anotherPiece.y, anotherPiece.cbMoveTo));
             replaceTarget(anotherPiece, this);
         }
@@ -41,7 +46,7 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
 }//class 'piece'
 
 function createEmptyPieceAt(x, y) {
-    var p = new Piece(EMPTY_NAME, undefined, undefined, x, y, undefined);
+    var p = new Piece(EMPTY_NAME, undefined, EMPTY_WEIGHT, x, y, undefined);
     p.hidden = false;
     return p;
 }
