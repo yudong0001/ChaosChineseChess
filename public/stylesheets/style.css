@@ -44,8 +44,12 @@ a {
     background-color: #5D5A5A;
 }
 
+#board {
+  /*position: relative;*/
+}
+
 .cell {
-	position: absolute;
+	/*position: absolute;*/
 	display: inline-block;
 	border: 1px solid black;
   cursor: pointer;
@@ -72,6 +76,3 @@ a {
     background-color: #ddd;
 }
 
-#board {
-	position: relative;
-}

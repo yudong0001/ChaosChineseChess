@@ -16,24 +16,36 @@ var cellSize = 50;
   <body>
     <!-- <h1><%= title %></h1> -->
     <!-- <p>欢迎赏玩<%= title %></p> -->
-	<div class="buttons">
-    <input class='button' type='button' id='AI' value='AI' />
-    <input class='button' type='button' id='Human' value='Human' />
-    <input class='button' type='button' id='Restart' value='Restart' />
-  </div>
-  <div class='players'>
-    <div id='player1' class ='player playerBorder '>HUMAN</div>
-    <div id='player2' class='player '>AI</div>
-  </div>
-  <div id="board">
-	<% for (var i = 0; i < rowsCount; i++) { %>
-		<% for (var j = 0; j < columnsCount; j++) { %>
-      <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;" >                
-			</div>
-		<% } %>
-		<br>
-	<% } %>
-	</div>
-  
+    <div class="buttons">
+      <input class='button' type='button' id='AI' value='AI' />
+      <input class='button' type='button' id='Human' value='Human' />
+      <input class='button' type='button' id='Restart' value='Restart' />
+    </div>
+    <div class='players'>
+      <div id='player1' class ='player playerBorder '>HUMAN</div>
+      <div id='player2' class='player '>AI</div>
+    </div>
+    
+    <!-- <div id="board">
+      <% for (var i = 0; i < rowsCount; i++) { %>
+		    <% for (var j = 0; j < columnsCount; j++) { %>
+          <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;" >                
+          </div>
+		    <% } %>
+		    <br>
+      <% } %>
+    </div> -->
+
+    <table id="board">
+      <% for (var i = 0; i < rowsCount; i++) { %>
+      <tr>
+        <% for (var j = 0; j < columnsCount; j++) { %>
+        <td id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;" >                
+        </td>
+        <% } %>
+      </tr>
+      <% } %>
+    </table>
+
   </body>
 </html>
