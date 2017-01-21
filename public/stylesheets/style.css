@@ -45,11 +45,11 @@ a {
 }
 
 #board {
-  /*position: relative;*/
+  position: relative;
 }
 
 .cell {
-	/*position: absolute;*/
+	position: absolute;
 	display: inline-block;
 	border: 1px solid black;
   cursor: pointer;

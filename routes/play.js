@@ -18,7 +18,7 @@ function randomInt(max){
 function AIPlayer(){
     this.camp = undefined;
     this.superJiang = true;
-    this.jiangStepChange = true;
+    //this.jiangStepChange = true;
     // function testCouldMove(pieceMami, targetMami) {
     //     return piece.canMoveTo(target);
     // }
@@ -34,11 +34,15 @@ function AIPlayer(){
         var rangeX = gameX.board.columnsCount;
         var rangeY = gameX.board.rowsCount-1;
         var candidates = [];
+        var candidatesOpp = [];
         var targets = [];
+        var freeTargets = [];
         var validMovements = [];
+        var validMovementsOpp = [];
         var freeWalk = [];
+        var freeWalkOpp = [];
 
-        console.log('entr AIPlayer.play ,board[0][0] is: %o' ,board[0][0]);//***********
+        console.log('entr AIPlayer.play ,board[0][0] is: %o' +board[0][0].camp+':'+board[0][0].name);//***********
 
         var count1=count2=0;
         for (var i = rangeY - 1; i >= 0; i--) {//row number
@@ -48,8 +52,12 @@ function AIPlayer(){
                 if(!board[i][j].hidden){
                     if(board[i][j].camp == this.camp){
                         candidates.push(board[i][j]);
+                    }else if(board[i][j].camp != undefined){
+                    		candidatesOpp.push(board[i][j]);
+                    		targets.push(board[i][j]);
                     }else{
-                        targets.push(board[i][j]);
+                    	targets.push(board[i][j]);
+                        freeTargets.push(board[i][j]);
                     }
                 }
             }
@@ -58,38 +66,99 @@ function AIPlayer(){
         //console.log('AIPlayer.candidates is: %o',candidates);//*************
         //console.log('AIPlayer.targets is: %o',targets);//************
 
+        for (var i = 0; i < candidatesOpp.length; i++) {
+            var candCell = candidatesOpp[i];
+            for (var j = 0; j < candidates.length; j++) {
+                var tarCell = candidates[j]; 
+                if (candCell.canMoveTo(tarCell, board)) {
+                    //console.log('canMoveTo for Opp:tarCell.weight:'+tarCell.weight);//********
+                    validMovementsOpp.push({pieceMami:candCell, targetMami:tarCell});
+                }
+            }
+        }//for escape
+
+        for (var i = 0; i < candidatesOpp.length; i++) {
+            var candCell = candidatesOpp[i];
+            for (var j = 0; j < freeTargets.length; j++) {
+                var tarCell = freeTargets[j]; 
+                if (candCell.canMoveTo(tarCell, board)) {
+                    //console.log('canMoveTo for freeWalkOpp:tarCell.weight:'+tarCell.weight);//********
+                    freeWalkOpp.push({pieceMami:candCell, targetMami:tarCell, danger:false});
+                }
+            }
+        }//for freeWalkOpp
+
         for (var i = 0; i < candidates.length; i++) {
             var candCell = candidates[i];
             for (var j = 0; j < targets.length; j++) {
                 var tarCell = targets[j]; 
                 if (candCell.canMoveTo(tarCell, board)) {
-                    console.log('canMoveTo:tarCell.weight:'+tarCell.weight);//********
+                    //console.log('canMoveTo:tarCell.weight:'+tarCell.weight);//********
                     if(tarCell.weight<10){
                         validMovements.push({pieceMami:candCell, targetMami:tarCell});
                     }else{
-                        freeWalk.push({pieceMami:candCell, targetMami:tarCell});
+                        freeWalk.push({pieceMami:candCell, targetMami:tarCell, danger:false});
                     }
                 }
             }
+        }//for kill&freeWalk
+
+        if (freeWalk.length > 0 && freeWalkOpp.length > 0) {
+            for(var i=0;i<freeWalk.length;i++){
+            	for(var j=0;j<freeWalkOpp.length;j++){
+            		if(freeWalk[i].targetMami.x==freeWalkOpp[j].targetMami.x && freeWalk[i].targetMami.y==freeWalkOpp[j].targetMami.y){
+            			freeWalk[i].danger = true;
+            		}
+            	}
+            }
         }
+
         if (validMovements.length > 0) {
             //var rv = randomInt(validMovements.length);
             //var piece = validMovements[rv].pieceMami;
             //var target = validMovements[rv].targetMami;
+            var canEscape = false;
             var rv = 0;
-            var target = validMovements[rv].targetMami;
-
-            console.log('AI.play:target.weight:'+target.weight);//*******
-            if (validMovements.length > 1){
-                for(var i = 1; i < validMovements.length; i++){
-                    if(target.weight > validMovements[i].targetMami.weight){
-                        rv = i;
-                        target = validMovements[rv].targetMami;
-                    }
-                    console.log('AI.play.validMovements:target.weight:'+target.weight);//*******
-                }
-            }
             var piece = validMovements[rv].pieceMami;
+            var target = validMovements[rv].targetMami;
+            console.log('AI.play:target.weight:'+target.weight);//*******
+            
+            if (validMovementsOpp.length > 0){
+            	for(var i=0;i<validMovementsOpp.length;i++){
+            		for(var j=0;j<validMovements.length;j++){
+            			if(validMovements[j].pieceMami == validMovementsOpp[i].targetMami && validMovements[j].pieceMami.weight<validMovements[rv].pieceMami.weight){
+            				rv = j;
+            				canEscape = true;
+            				piece = validMovements[rv].pieceMami;
+            				target = validMovements[rv].targetMami;
+            			}
+            		}
+            	}//for kill first
+            	if(!canEscape && freeWalk.length > 0){
+            		for(var i=0;i<validMovementsOpp.length;i++){
+            			for(var j=0;j<freeWalk.length;j++){
+            				if(freeWalk[j].pieceMami == validMovementsOpp[i].targetMami && freeWalk[j].pieceMami.weight<freeWalk[rv].pieceMami.weight){
+            					rv = j;
+            					canEscape = true;
+            					piece = freeWalk[rv].pieceMami;
+            					target = freeWalk[rv].targetMami;
+            				}
+            			}
+            		}
+            	}//for escape
+            }
+
+            if (!canEscape && validMovements.length > 1){
+            	for(var i = 1; i < validMovements.length; i++){
+                   	if(target.weight > validMovements[i].targetMami.weight){
+                       	rv = i;
+                       	piece = validMovements[rv].pieceMami;
+            			target = validMovements[rv].targetMami;
+                   	}
+                   	//console.log('AI.play.validMovements:target.weight:'+target.weight);//*******
+                }
+            }//for normal kill
+            //var piece = validMovements[rv].pieceMami;
             
             /*if(piece.name == '将'&&this.superJiang){this.superJiang = false;}
             if(jiangStepChange&&piece.name == '将'&&!this.superJiang){*/
@@ -162,7 +231,21 @@ function AIPlayer(){
         }else {
             console.log('电脑 freeWalk');//*******
             if (freeWalk.length > 0) {
+            	// for(var i=0;i<freeWalk.length;i++){
+            	// 	for(var j=0;j<freeWalkOpp.length;j++){
+            	// 		if(freeWalk[i].targetMami.x==freeWalkOpp[j].targetMami.x && freeWalk[i].targetMami.y==freeWalkOpp[j].targetMami.y){
+            	// 			freeWalk[i].danger = true;
+            	// 		}
+            	// 	}
+            	// }
+
                 var rv = randomInt(freeWalk.length);
+                var conut = 20;
+                while(conut-- >0&&freeWalk[rv].danger){
+                	rv = randomInt(freeWalk.length);
+                	console.log('rv&freeWalk[rv].danger:'+rv+':'+freeWalk[rv].danger);//*******
+                }
+
                 var piece = freeWalk[rv].pieceMami;
                 var target = freeWalk[rv].targetMami;
            
@@ -183,8 +266,8 @@ function AIPlayer(){
             }else{
                 console.log('电脑 pass 一步');//*******
                 resp.json({
-                action:'pass',
-            });
+                	action:'pass',
+            	});
             }
             
         }
