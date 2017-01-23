@@ -34,7 +34,7 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
     }
 
     this.moveTo = function(anotherPiece) {
-        console.log('piece.moveTo:who is this? %o',this);//*******
+        console.log('piece.moveTo:who is this? %o'+this.camp+this.name);//*******
         if (anotherPiece.name == EMPTY_NAME) {
             replaceTarget(anotherPiece, this);
         }else {
@@ -71,7 +71,7 @@ function obstaclesCountOnStraightLine(p1, p2, cboard) {
         }
         for (var i = lowLimit + 1; i < upLimit; i++) {
             if (cboard[i][p1.x].name != EMPTY_NAME) {
-                console.log('board.obstacles.cboard[i][p1.x]:%o',cboard[i][p1.x]);//*******
+                //console.log('board.obstacles.cboard[i][p1.x]:%o',cboard[i][p1.x]);//*******
                 count++;
             }
         }
@@ -84,7 +84,7 @@ function obstaclesCountOnStraightLine(p1, p2, cboard) {
         }
         for (var i = lowLimit + 1; i < upLimit; i++) {
             if (cboard[p1.y][i].name != EMPTY_NAME) {
-                console.log('board.obstacles.cboard[p1.y][i]:%o',cboard[p1.y][i]);//*******
+                //console.log('board.obstacles.cboard[p1.y][i]:%o',cboard[p1.y][i]);//*******
                 count++;
             }
         }
@@ -115,7 +115,7 @@ var piecesDesc = {
         var cboard = cboard;
         if (isInStraightLine(this, piece)) {
             var count = obstaclesCountOnStraightLine(this, piece, cboard);
-            console.log('count for piece"Cannon":obstaclesCountOnStraightLine(this, piece):'+count);//*******
+            //console.log('count for piece"Cannon":obstaclesCountOnStraightLine(this, piece):'+count);//*******
             return (piece.camp == undefined && count == 0) || (piece.camp != undefined && count == 1);
         }
         return false;
