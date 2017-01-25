@@ -60,8 +60,8 @@ function AIPlayer(){
                     		candidatesOpp.push(board[i][j]);
                     		targets.push(board[i][j]);
                     }else{
-                    	targets.push(board[i][j]);//for kill
-                        freeTargets.push(board[i][j]);//targets for freewalkOpp
+                    	targets.push(board[i][j]);//for AI kill
+                        freeTargets.push(board[i][j]);//for freeWalkOpp
                     }
                 }
             }
@@ -116,19 +116,20 @@ function AIPlayer(){
             	}
                 if(validMovementsOpp.length>0){
                     for(var jj=0;jj<validMovementsOpp.length;jj++){
-                        if(isSame(freeWalk[i].pieceMami, validMovementsOpp[jj].targetMami) 
-                            &&(validMovementsOpp[jj].pieceMami.name == '车' || validMovementsOpp[jj].pieceMami.name == '炮')){
-                            if (validMovementsOpp[jj].pieceMami.x == validMovementsOpp[jj].targetMami.x 
-                                && validMovementsOpp[jj].pieceMami.x == freeWalk[i].targetMami.x
-                                || validMovementsOpp[jj].pieceMami.y == validMovementsOpp[jj].targetMami.y 
-                                && validMovementsOpp[jj].pieceMami.y == freeWalk[i].targetMami.y){
-                                freeWalk[i].danger = true;
-                            }
-                            if((freeWalk[i].pieceMami.name == '士' || freeWalk[i].pieceMami.name == '马')
-                                && validMovementsOpp[jj].pieceMami.x == freeWalk[i].targetMami.x
-                                || validMovementsOpp[jj].pieceMami.y == freeWalk[i].targetMami.y){
-                                freeWalk[i].danger = true;
-                            }
+                        if( isSame(freeWalk[i].pieceMami, validMovementsOpp[jj].targetMami) 
+                            && (validMovementsOpp[jj].pieceMami.name == '车' || validMovementsOpp[jj].pieceMami.name == '炮') ){
+                                if( (validMovementsOpp[jj].pieceMami.x == validMovementsOpp[jj].targetMami.x 
+                                    && validMovementsOpp[jj].pieceMami.x == freeWalk[i].targetMami.x)
+                                    || (validMovementsOpp[jj].pieceMami.y == validMovementsOpp[jj].targetMami.y 
+                                    && validMovementsOpp[jj].pieceMami.y == freeWalk[i].targetMami.y) ){
+                                        freeWalk[i].danger = true;
+                                }
+                                if( validMovementsOpp[jj].pieceMami.name == '车' 
+                                    && (freeWalk[i].pieceMami.name == '士' || freeWalk[i].pieceMami.name == '相' || freeWalk[i].pieceMami.name == '马')
+                                    && (validMovementsOpp[jj].pieceMami.x == freeWalk[i].targetMami.x
+                                    || validMovementsOpp[jj].pieceMami.y == freeWalk[i].targetMami.y) ){
+                                        freeWalk[i].danger = true;
+                                }
                         }
                     }
                 }
@@ -140,7 +141,8 @@ function AIPlayer(){
         // }
 
         if (validMovements.length > 0 || freeWalk.length > 0) {
-            var canEscape = false;
+            // var canEscape = false;
+            var movements = new Array;
             var rv = 0;
             var piece = validMovements.length > 0?validMovements[rv].pieceMami:freeWalk[rv].pieceMami;
             var target = validMovements.length > 0?validMovements[rv].targetMami:freeWalk[rv].targetMami;
@@ -151,7 +153,8 @@ function AIPlayer(){
                 //console.log('some pieces danger,prepare to first kill,validMovements:%o',validMovements);//*******
                 // piece = validMovements[rv].pieceMami;
                 // target = validMovements[rv].targetMami;
-            	for(var i=0;i<validMovementsOpp.length;i++){
+            	var actWeight = -1;
+                for(var i=0;i<validMovementsOpp.length;i++){
             		for(var j=0;j<validMovements.length;j++){
                         //console.log('prepare to do first kill.validMovements:',validMovements);//*****
                         //console.log('prepare to do first kill.validMovementsOpp:',validMovementsOpp);//*****
@@ -160,18 +163,35 @@ function AIPlayer(){
             			if( isSame(validMovements[j].pieceMami, validMovementsOpp[i].targetMami) 
                             && validMovements[j].pieceMami.weight <= validMovements[rv].pieceMami.weight){
             				rv = j;
-            				canEscape = true;
+            				//canEscape = true;
+                            movements.push({action:'firstKill', rv:j});
                             console.log('AI will do first kill.');//*****
             				// piece = validMovements[rv].pieceMami;
             				// target = validMovements[rv].targetMami;
             			}
+
+                        if( isSame(validMovements[j].targetMami, validMovementsOpp[i].pieceMami)
+                             && (validMovementsOpp[i].pieceMami.weight <= validMovements[rv].targetMami.weight 
+                             || validMovementsOpp[i].targetMami.weight <= validMovements[rv].targetMami.weight) ){
+                            rv = j;
+                            //canEscape = true;
+                            if(validMovementsOpp[i].pieceMami.weight<=validMovementsOpp[i].targetMami.weight){
+                                actWeight = validMovementsOpp[i].pieceMami.weight;
+                            }else{
+                                actWeight = validMovementsOpp[i].targetMami.weight;
+                            }
+                            movements.push({action:'firstKill', rv:j, actWeight:actWeight});
+                            console.log('AI prepare kill killed.');//*******
+                        }
             		}
             	}
-                piece = validMovements[rv].pieceMami;
-                target = validMovements[rv].targetMami;
+                // piece = validMovements[rv].pieceMami;
+                // target = validMovements[rv].targetMami;
             }//for first kill
             
-            if(!canEscape && validMovementsOpp.length > 0 && freeWalk.length > 0){
+            // if(!canEscape && validMovementsOpp.length > 0 && freeWalk.length > 0){
+            if(validMovementsOpp.length > 0 && freeWalk.length > 0){
+                rv = 0;
                 console.log('some pieces danger,prepare to escape,rv initial value:'+rv);//*******
                 //console.log('some pieces danger,prepare to escape,validMovementsOpp:%o',validMovementsOpp);//*******
                 // piece = freeWalk[rv].pieceMami;
@@ -180,35 +200,72 @@ function AIPlayer(){
             		for(var j=0;j<freeWalk.length;j++){
                         console.log('');//*****
             			if( isSame(freeWalk[j].pieceMami, validMovementsOpp[i].targetMami) 
-                            && freeWalk[j].pieceMami.weight<=freeWalk[rv].pieceMami.weight
+                            && freeWalk[j].pieceMami.weight <= freeWalk[rv].pieceMami.weight
                             && !freeWalk[j].danger){
             				rv = j;
-            				canEscape = true;
-                            console.log('AI will escape first.');//******
+            				//canEscape = true;
+                            movements.push({action:'escape', rv:j});
+                            console.log('AI prepare to escape.');//******
             				// piece = freeWalk[rv].pieceMami;
             				// target = freeWalk[rv].targetMami;
             			}
             		}
             	}
-                piece = freeWalk[rv].pieceMami;
-                target = freeWalk[rv].targetMami;
-                console.log('for safe escape:'+freeWalk[rv].danger);//*******
+                // piece = freeWalk[rv].pieceMami;
+                // target = freeWalk[rv].targetMami;
+                console.log('for safe escape.freeWalk[rv].danger:'+freeWalk[rv].danger);//*******
             }//for escape
 
-            if (!canEscape && validMovements.length > 0){
-                canEscape = true;
-                for(var i = 1; i < validMovements.length; i++){
+            // if (!canEscape && validMovements.length > 0){
+            if (validMovements.length > 0){
+                rv = 0;
+                //canEscape = true;
+                for(var i = 0; i < validMovements.length; i++){
                     if(validMovements[i].targetMami.weight <= validMovements[rv].targetMami.weight ){
                         rv = i;
+                        movements.push({action:'normalKill', rv:i})
                     }
                     //console.log('AI.play.validMovements:target.weight:'+target.weight);//*******
                 }
                 console.log('AI will do normal kill');//******
-                piece = validMovements[rv].pieceMami;
-                target = validMovements[rv].targetMami;
+                // piece = validMovements[rv].pieceMami;
+                // target = validMovements[rv].targetMami;
             }//for normal kill
             
-            if(canEscape){
+            //if(canEscape){
+            if(movements.length>0){
+                console.log('movements: %o',movements);//*******
+                var tmpWeight = 100, mi = 0;
+                for(var c=0;c<movements.length;c++){
+                    if(movements[c].action == 'firstKill'){
+                        if(movements[c].actWeight && movements[c].actWeight < tmpWeight){
+                            tmpWeight = movements[c].actWeight;
+                            mi = c;
+                        }else if(validMovements[movements[c].rv].pieceMami.weight < tmpWeight){
+                            tmpWeight = validMovements[movements[c].rv].pieceMami.weight;
+                            mi = c;
+                        }
+                        console.log('firstKill.validMovements: %o', validMovements[movements[c].rv]);//*******
+                    }else if(movements[c].action == 'escape' && freeWalk[movements[c].rv].pieceMami.weight < tmpWeight){
+                        tmpWeight = freeWalk[movements[c].rv].pieceMami.weight;
+                        mi = c;
+                        console.log('escape.freeWalk: %o', freeWalk[movements[c].rv]);//*******
+                    }else if(movements[c].action == 'normalKill' && validMovements[movements[c].rv].targetMami.weight <= tmpWeight){
+                        tmpWeight = validMovements[movements[c].rv].pieceMami.weight;
+                        mi = c;
+                        console.log('normalKill.validMovements: %o', validMovements[movements[c].rv]);//*******
+                    }
+                }
+                if(movements[mi].action == 'escape'){
+                    console.log('AI decide to escape.');//******
+                    piece = freeWalk[movements[mi].rv].pieceMami;
+                    target = freeWalk[movements[mi].rv].targetMami;
+                }else if(movements[mi].action == 'firstKill' || movements[mi].action == 'normalKill'){
+                    console.log('AI decide to kill.');//******
+                    piece = validMovements[movements[mi].rv].pieceMami;
+                    target = validMovements[movements[mi].rv].targetMami;
+                }
+
                 if(this.superJiang&&piece.name == '将'){
                     console.log('AI:start to change the step method for jiang.');//******
                     this.superJiang = false;
