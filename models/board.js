@@ -19,6 +19,7 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
     this.x = x;
     this.y = y;
     this.canMoveTo = cbMoveTo;
+    this.isCovered = false;
     this.hidden = true;
 
     function replaceTarget(target, source) {
@@ -26,11 +27,13 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
         target.camp = source.camp;
         target.weight = source.weight;
         target.canMoveTo = source.canMoveTo;
+        //target.canProtect = source.canProtect;
 
         source.name = EMPTY_NAME;
         source.camp = undefined;
         source.weight = EMPTY_WEIGHT;
         source.canMoveTo = undefined;
+        //source.canProtect = undefined;
     }
 
     this.moveTo = function(anotherPiece) {
