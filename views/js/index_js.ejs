@@ -11,7 +11,17 @@ $(document).ready(function(){
 
     var rowsCount = <%=rowsCount%>;
     var columnsCount = <%=columnsCount%>;
-    var cellSize = <%=cellSize%>;
+    //var cellSize = <%=cellSize%>;
+    //var pageWidth = parseFloat(document.body.scrollWidth;
+    var boardWidth = parseFloat($('#board').css('width'));
+    console.log('board width:'+boardWidth);
+    cellsize = (boardWidth-18)/10;
+    //cellsize = window.screen.availWidth*0.8/9;
+    console.log('cell-size:'+cellsize);
+    //$('#board').css();
+    $('.cell').css('width',cellsize).css('height',cellsize);
+    $('#board').css('background-position-x', $('.cell').css('width')/2-5);
+    $('#board').css('background-position-y', $('.cell').css('width')/2-5);
 
     function getCellFromMami(jqMami) {
         var x = jqMami.css('left');

@@ -5,7 +5,7 @@
 <META HTTP-EQUIV="expires" CONTENT="0"> -->
 
 <%
-var cellSize = 50;
+var cellSize = '38px';
 %>
 <html>
   <head>
@@ -26,17 +26,22 @@ var cellSize = 50;
       <div id='player2' class='player '>AI</div>
     </div>
     
-    <!-- <div id="board">
-      <% for (var i = 0; i < rowsCount; i++) { %>
-		    <% for (var j = 0; j < columnsCount; j++) { %>
-          <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px;left:<%=j*cellSize%>px;" >                
-          </div>
-		    <% } %>
-		    <br>
-      <% } %>
-    </div> -->
-
-    <table id="board">
+    <div id="mainPart">
+    	<div id="board">
+    	  <% for (var i = 0; i < rowsCount; i++) { %>
+			    <% for (var j = 0; j < columnsCount; j++) { %>
+    	      <!-- <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px	;left:<%=j*cellSize%>px;" >                
+    	      </div> -->
+    	      <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " >                
+    	      </div>
+			    <% } %>
+			    <br>
+    	  <% } %>
+    	</div>
+    	<div id="info-r">Info right</div>
+    	<div id="info-b">info bottom</div>
+    </div>
+    <!-- <div><table id="board">
       <% for (var i = 0; i < rowsCount; i++) { %>
       <tr>
         <% for (var j = 0; j < columnsCount; j++) { %>
@@ -45,7 +50,7 @@ var cellSize = 50;
         <% } %>
       </tr>
       <% } %>
-    </table>
+    </table></div> -->
 
   </body>
 </html>
