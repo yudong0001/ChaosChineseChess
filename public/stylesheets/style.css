@@ -48,11 +48,13 @@ a {
   background-color: #5D5A5A;
 }
 #mainPart{
-  width:100%;
+  width:100%; 
 }
 #board {
   /*position: relative;*/
   width:85%;
+  min-width: 500px;
+  max-width: 800px;
   margin: 2%;
   background-image: url(/image/p169v2.png);
   background-repeat: no-repeat;
