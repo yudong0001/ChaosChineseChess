@@ -15,19 +15,25 @@ $(document).ready(function(){
     //var pageWidth = parseFloat(document.body.scrollWidth;
     var boardWidth = parseFloat($('#board').css('width'));
     console.log('board width:'+boardWidth);
-    cellsize = (boardWidth-18)/10;
+    var cellSize = boardWidth/9-2;
     //cellsize = window.screen.availWidth*0.8/9;
-    console.log('cell-size:'+cellsize);
-    //$('#board').css();
-    $('.cell').css('width',cellsize).css('height',cellsize);
-    $('#board').css('background-position-x', $('.cell').css('width')/2-5);
-    $('#board').css('background-position-y', $('.cell').css('width')/2-5);
+    console.log('cell-size:'+cellSize);
+    $('#board').css('height',(cellSize+2)*rowsCount);
+    $('.cell').css('width',cellSize).css('height',cellSize);
+    var bgMargin = parseFloat($('.cell').css('width'))/2*0.7;
+    $('#board').css('background-position-x', bgMargin);
+    $('#board').css('background-position-y', bgMargin);
 
     function getCellFromMami(jqMami) {
-        var x = jqMami.css('left');
-        var y = jqMami.css('top');
-        x = x.substring(0, x.length - 2) / cellSize;
-        y = y.substring(0, y.length - 2) / cellSize;
+        // var x = jqMami.css('left');
+        // var y = jqMami.css('top');
+        // x = x.substring(0, x.length - 2) / cellSize;
+        // y = y.substring(0, y.length - 2) / cellSize;
+        var cellid = jqMami.attr('id');
+        console.log('clicked cell id:'+cellid);//*******
+        var y = cellid.substring(4,5)%10;
+        var x = cellid.substring(4)%10;
+        console.log('clicked cell x,y:'+x+':'+y);//*****
         return {x: x, y: y};
     }
 

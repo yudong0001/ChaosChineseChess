@@ -1,8 +1,12 @@
 body {
-  padding: 50px;
+  margin: 0px;
+  padding: 0px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
-
+div {
+  margin:0px;
+  padding: 0px;
+}
 a {
   color: #00B7FF;
 }
@@ -51,13 +55,14 @@ a {
   width:80%;
   background-image: url(/image/p169v2.png);
   background-repeat: no-repeat;
-  background-size: 92.5%;
-  background-position: 11px 11px;
+  background-size: 92.8%;
+  /*background-position: 11px 11px;*/
 }
 
 .cell {
 	/*position: absolute;*/
-	display: inline-block;
+	display: block;
+  float: left;
 	border: 1px solid black;
   cursor: pointer;
   /*background-color: #eee;*/
