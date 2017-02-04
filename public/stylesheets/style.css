@@ -52,7 +52,8 @@ a {
 }
 #board {
   /*position: relative;*/
-  width:80%;
+  width:85%;
+  margin: 2%;
   background-image: url(/image/p169v2.png);
   background-repeat: no-repeat;
   background-size: 92.8%;
@@ -65,10 +66,14 @@ a {
   float: left;
 	border: 1px solid black;
   cursor: pointer;
+  background-image: url(/image/pieceHide.png);
+  background-size: 80%;
+  background-repeat: no-repeat;
+  background-position: 50%;
   /*background-color: #eee;*/
 }
 .discovered.cell {
-  /*background-color: #fff;*/
+  background-image: none;
   text-align: center;
   line-height: 50px;
 }
