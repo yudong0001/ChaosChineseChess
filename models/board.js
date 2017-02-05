@@ -12,8 +12,9 @@ var deadPieces = [];
 
 var camper = require('./camper');
 
-function Piece(name, camp, weight,x, y, cbMoveTo) {
+function Piece(name, fname, camp, weight,x, y, cbMoveTo) {
     this.name = name;
+    this.fname = fname;
     this.camp = camp;
     this.weight = weight;
     this.x = x;
@@ -24,12 +25,14 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
 
     function replaceTarget(target, source) {
         target.name = source.name;
+        target.fname = source.fname;
         target.camp = source.camp;
         target.weight = source.weight;
         target.canMoveTo = source.canMoveTo;
         //target.canProtect = source.canProtect;
 
         source.name = EMPTY_NAME;
+        source.fname = undefined;
         source.camp = undefined;
         source.weight = EMPTY_WEIGHT;
         source.canMoveTo = undefined;
@@ -41,7 +44,7 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
         if (anotherPiece.name == EMPTY_NAME) {
             replaceTarget(anotherPiece, this);
         }else {
-            deadPieces.push(Piece(anotherPiece.name, anotherPiece.camp, anotherPiece.weight,
+            deadPieces.push(Piece(anotherPiece.name, anotherPiece.fname, anotherPiece.camp, anotherPiece.weight,
                 anotherPiece.x, anotherPiece.y, anotherPiece.cbMoveTo));
             replaceTarget(anotherPiece, this);
         }
@@ -49,7 +52,7 @@ function Piece(name, camp, weight,x, y, cbMoveTo) {
 }//class 'piece'
 
 function createEmptyPieceAt(x, y) {
-    var p = new Piece(EMPTY_NAME, undefined, EMPTY_WEIGHT, x, y, undefined);
+    var p = new Piece(EMPTY_NAME, undefined, undefined, EMPTY_WEIGHT, x, y, undefined);
     p.hidden = false;
     return p;
 }
@@ -96,25 +99,25 @@ function obstaclesCountOnStraightLine(p1, p2, cboard) {
 }
 
 var piecesDesc = {
-    '车': {count:2, weight:1, cbMoveTo:function(piece,cboard){
+    '车': {fname:'JU', count:2, weight:1, cbMoveTo:function(piece,cboard){
         return isInStraightLine(this, piece) && obstaclesCountOnStraightLine(this, piece, cboard) == 0;
      }},
-    '马': {count:2, weight:4, cbMoveTo:function(piece,cboard){
+    '马': {fname:'MA', count:2, weight:4, cbMoveTo:function(piece,cboard){
         var dx = Math.abs(this.x - piece.x);
         var dy = Math.abs(this.y - piece.y);
         var cboard =cboard;
         return (dx == 1 && dy == 2 && cboard[(this.y + piece.y) / 2][this.x].name == EMPTY_NAME) ||
             (dx == 2 && dy == 1 && cboard[this.y][(this.x + piece.x) / 2].name == EMPTY_NAME);
     }},
-    '相': {count:2, weight:7, cbMoveTo:function(piece, cboard){
+    '相': {fname:'XIANG', count:2, weight:7, cbMoveTo:function(piece, cboard){
         var cboard = cboard;
         return Math.abs(this.x - piece.x) == 2 && Math.abs(this.y - piece.y) == 2 &&
             cboard[(this.y + piece.y) / 2][(this.x + piece.x) / 2].name == EMPTY_NAME;
     }},
-    '士': {count:2, weight:5, cbMoveTo:function(piece, cboard){
+    '士': {fname:'SHI', count:2, weight:5, cbMoveTo:function(piece, cboard){
         return Math.abs(this.x - piece.x) == 1 && Math.abs(this.y - piece.y) == 1;
     }},
-    '炮': {count:2, weight:3, cbMoveTo:function(piece, cboard){
+    '炮': {fname:'PAO', count:2, weight:3, cbMoveTo:function(piece, cboard){
         var cboard = cboard;
         if (isInStraightLine(this, piece)) {
             var count = obstaclesCountOnStraightLine(this, piece, cboard);
@@ -123,7 +126,7 @@ var piecesDesc = {
         }
         return false;
     }},
-    '将': {count:1, weight:2, cbMoveTo:function(piece,cboard){
+    '将': {fname:'JIANG', count:1, weight:2, cbMoveTo:function(piece,cboard){
         var cboard = cboard;
         var dx = Math.abs(this.x - piece.x);
         var dy = Math.abs(this.y - piece.y);
@@ -138,7 +141,7 @@ var piecesDesc = {
                 (dx == 2 && dy == 1 && cboard[this.y][(this.x + piece.x) / 2].name == EMPTY_NAME))||
                 ((dx == 1 && (dy == 1 || dy == 0)) || (dx == 0 && dy == 1));
     }},
-    '兵': {count:5, weight:6, cbMoveTo:function(piece, cboard){
+    '兵': {fname:'BING', count:5, weight:6, cbMoveTo:function(piece, cboard){
         var dx = Math.abs(this.x - piece.x);
         var dy = Math.abs(this.y - piece.y);
         return (dx == 1 && dy == 0) || (dx == 0 && dy == 1);
@@ -149,7 +152,7 @@ var availablePieces = [];
 
 function createPiece(camp, name, desc) {
     for (var i = 0; i < desc.count; i++) {
-        availablePieces.push({camp: camp, name: name, weight: desc.weight, cb: desc.cbMoveTo});
+        availablePieces.push({camp: camp, name: name, fname: desc.fname, weight: desc.weight, cb: desc.cbMoveTo});
     }
 }
 
@@ -167,7 +170,7 @@ function popAPieceTo(x, y) {
         } else {
             piece = availablePieces.splice(randomInt(availablePieces.length), 1)[0];
         }
-        return new Piece(piece.name, piece.camp, piece.weight, x, y, piece.cb);
+        return new Piece(piece.name, piece.fname, piece.camp, piece.weight, x, y, piece.cb);
     } else {
         return createEmptyPieceAt(x, y);
     }

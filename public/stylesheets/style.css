@@ -66,7 +66,7 @@ a {
 	/*position: absolute;*/
 	display: block;
   float: left;
-	border: 1px solid black;
+	border: 1px solid #f5f9f9;
   cursor: pointer;
   background-image: url(/image/pieceHide.png);
   background-size: 80%;
@@ -92,6 +92,6 @@ a {
     background-color: green;
 }
 .cell:hover {
-    background-color: #ddd;
+    background-color: #f3f0f0;
 }
 
