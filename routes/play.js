@@ -10,7 +10,7 @@ var jiangNormal = function(piece, cboard){
 var EMPTY_NAME = '空';
 
 function randomInt(max){
-    var rvalue = Math.floor( Math.random()*max );
+    var rvalue = Math.round( Math.random()*max );
     console.log('randomInt value:'+ rvalue);//*******
     return rvalue;
 }
@@ -36,7 +36,7 @@ function AIPlayer(){
 
         var board = gameX.board.grids;
         var rangeX = gameX.board.columnsCount;
-        var rangeY = gameX.board.rowsCount-1;
+        var rangeY = gameX.board.rowsCount;
         var candidates = [];
         var candidatesOpp = [];
         var targets = [];

@@ -192,7 +192,6 @@ function Board(gameId){
                 board[i].push(createEmptyPieceAt(j, i));
             }
         } else {
-
             for (var j = 0; j < columnsCount; j++) {
                 if (j == emptyColumn) {
                     board[i].push(createEmptyPieceAt(j, i));
