@@ -11,6 +11,9 @@ a {
   color: #00B7FF;
 }
 
+.inlineDiv{
+  display: inline-block;
+}
 .buttons{}
 .button{
     text-align: center;
@@ -49,13 +52,25 @@ a {
 }
 #mainPart{
   width:100%; 
+  min-width: 500px;
+  max-width: 1000px;
 }
+#divMLeft{
+  width:80%;
+  padding: 0%;
+  padding-bottom: 1%;
+  border: 2px solid #a5a9a9;
+  float:left;
+}
+#divMRight{
+  width: 18%;
+  display: inline-block;
+  color: #8E8D8D;
+}
+
 #board {
   /*position: relative;*/
-  width:85%;
-  min-width: 500px;
-  max-width: 800px;
-  margin: 2%;
+  width:100%;
   background-image: url(/image/p169v2.png);
   background-repeat: no-repeat;
   background-size: 92.8%;
@@ -95,3 +110,42 @@ a {
     background-color: #f3f0f0;
 }
 
+#divDeads{}
+
+.cellDead{
+  display: block;
+  float: left;
+  border: 1px solid #f5f9f9;
+  background-image: url(/image/pieceHide.png);
+  background-size: 80%;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.action1,.action2{
+  width: 60%;
+  margin: 29% 20%;
+  background-size: 90%;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+#divCurrCamp{
+  margin: 18% 2%;
+  text-align:center;
+}
+#divAway{
+  background-image: url(/image/bgAway.png);
+}
+#divPeace{
+  background-image: url(/image/bgPeace.png);
+}
+#divSet{
+  background-image: url(/image/bgSet.png);
+  margin-top:29%;
+  margin-bottom: 7%;
+}
+#divShare{
+  background-image: url(/image/bgShare.png);
+  margin-bottom: 0;
+  margin-top: 0;
+}

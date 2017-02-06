@@ -16,12 +16,17 @@ $(document).ready(function(){
     var boardWidth = parseFloat($('#board').css('width'));
     console.log('board width:'+boardWidth);//******
     var cellSize = boardWidth/9-2;
+    var cellDSize = boardWidth/16-2;
     console.log('cell-size:'+cellSize);//******
     $('#board').css('height',(cellSize+2)*rowsCount);
     $('.cell').css('width',cellSize).css('height',cellSize);
+    $('#divDeads').css('height',(cellDSize+2)*2);
+    $('.cellDead').css('width',cellDSize).css('height',cellDSize);
     var bgMargin = parseFloat($('.cell').css('width'))/2*0.7;
     $('#board').css('background-position-x', bgMargin);
     $('#board').css('background-position-y', bgMargin);
+    $('.action1').css('height',parseFloat($('.action1').css('width')));
+    $('.action2').css('height',parseFloat($('.action2').css('width'))/2);
 
     function getCellFromMami(jqMami) {
         // var x = jqMami.css('left');

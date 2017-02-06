@@ -27,19 +27,37 @@ var cellSize = '38px';
     </div>
     
     <div id="mainPart">
-    	<div id="board">
-    	  <% for (var i = 0; i < rowsCount; i++) { %>
-			    <% for (var j = 0; j < columnsCount; j++) { %>
-    	      <!-- <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " style="width:<%=cellSize%>px;height:<%=cellSize%>px;top:<%=i*cellSize%>px	;left:<%=j*cellSize%>px;" >                
-    	      </div> -->
-    	      <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " >                
-    	      </div>
-			    <% } %>
-			    <br>
-    	  <% } %>
+    	<div id="divMLeft">
+    		<div id="board">
+    		  <% for (var i = 0; i < rowsCount; i++) { %>
+				    <% for (var j = 0; j < columnsCount; j++) { %>
+    		      <!-- <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " style="width:<%=cellSize%>px;height:<%=cellSize%>	px;top:<%=i*cellSize%>px	;left:<%=j*cellSize%>px;" >                
+    		      </div> -->
+    		      <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " >                
+    		      </div>
+				    <% } %>
+				    <br>
+    		  <% } %>
+    		</div>
+    		<div id="divDeads">
+    			<% for (var i = 0; i < 2; i++) { %>
+				    <% for (var j = 0; j < 16; j++) { %>
+    		      <!-- <div id="cell<%= i %><%= j %>" class="cell <%= i==4||j==4?'discovered':'' %> " style="width:<%=cellSize%>px;height:<%=cellSize%>	px;top:<%=i*cellSize%>px	;left:<%=j*cellSize%>px;" >                
+    		      </div> -->
+    		      <div id="cellDead<%= i %><%= j %>" class="cellDead" >                
+    		      </div>
+				    <% } %>
+				    <br>
+    		  <% } %>
+    		</div>
     	</div>
-    	<div id="info-r">Info right</div>
-    	<div id="info-b">info bottom</div>
+    	<div id="divMRight">
+    		<div id="divCurrCamp">当前：<div id="currCamp" class="inlineDiv">Player1</div></div>
+    		<div id="divAway" class="action1"></div>
+    		<div id="divPeace" class="action1"></div>
+    		<div id="divSet" class="action2"></div>
+    		<div id="divShare" class="action2"></div>
+    	</div>
     </div>
     <!-- <div><table id="board">
       <% for (var i = 0; i < rowsCount; i++) { %>
