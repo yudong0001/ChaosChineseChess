@@ -369,7 +369,7 @@ function AIPlayer(){
 
         if (undiscovered.length > 0) {
             console.log('start to discover a cell by AI.');//**********
-            var toBeDiscovered = undiscovered[randomInt(undiscovered.length)];
+            var toBeDiscovered = undiscovered[randomInt(undiscovered.length-1)];
             console.log('电脑翻开了 ' + toBeDiscovered.camp + ' ' + toBeDiscovered.name);//*******
             toBeDiscovered.hidden = false;
             resp.json({
@@ -413,10 +413,10 @@ function AIPlayer(){
             	// 	}
             	// }
 
-                var rv = randomInt(freeWalk.length);
+                var rv = randomInt(freeWalk.length-1);
                 var conut = 20;
                 while(conut-- >0&&freeWalk[rv].danger){
-                	rv = randomInt(freeWalk.length);
+                	rv = randomInt(freeWalk.length-1);
                 	console.log('AI random safe freeWalk: rv&freeWalk[rv].danger:'+rv+':'+freeWalk[rv].danger);//*******
                 }
 
