@@ -189,6 +189,7 @@ function AIPlayer(){
 
         if (validMovements.length > 0 || freeWalk.length > 0) {
             var validFirstKills = new Array;
+            var validFightBacks = new Array;
             var validPreKills = new Array;
             var validEscapes = new Array;
             var movements = new Array;
@@ -225,10 +226,11 @@ function AIPlayer(){
                         }
 
                         if( isSame(validMovements[j].targetMami, validMovementsOpp[i].pieceMami)){
-                            rv = j;
-                            actWeight = validMovementsOpp[i].targetMami.weight;
-                            //movements.push({action:'fightBack', rv:j, actWeight:actWeight});
-                            console.log('AI prepare kill killed.');//*******
+                            if(actWeight>validMovementsOpp[i].targetMami.weight){
+                                actWeight = validMovementsOpp[i].targetMami.weight;
+                                rv = j;
+                                console.log('AI prepare kill killed.');//*******
+                            }
                         }
                         
             		}
@@ -321,7 +323,8 @@ function AIPlayer(){
                         tmpWeight = validFirstKills[movements[c].rv].pieceMami.weight;
                         mi = c;
                         console.log('firstKill.validFirstKills: %o', validFirstKills[movements[c].rv]);//*******
-                    }else if(movements[c].action == 'fightBack' &&movements[c].actWeight < tmpWeight){
+                    }else if(movements[c].action == 'fightBack' &&movements[c].actWeight <= tmpWeight 
+                        && !validMovements[movements[c].rv].targetMami.isCovered){
                         fightBack = true;
                         firstKill = false;
                         tmpWeight = movements[c].actWeight;
@@ -346,37 +349,44 @@ function AIPlayer(){
                             console.log('normalKill.validMovements: %o', validMovements[movements[c].rv]);//*******
                         }
                     }
+                    if( validMovements[movements[mi].rv].targetMami.isCovered 
+                        && validMovements[movements[mi].rv].targetMami.weight>=validMovements[movements[mi].rv].pieceMami.weight ){
+                        tmpWeight = 100;
+                    }
                 }
 
-                if(movements[mi].action == 'escape'){
-                    console.log('AI decide to escape.');//******
-                    piece = validEscapes[movements[mi].rv].pieceMami;
-                    target = validEscapes[movements[mi].rv].targetMami;
-                }else if(movements[mi].action == 'firstKill'){
-                    console.log('AI decide to firstKill.');//******
-                    piece = validFirstKills[movements[mi].rv].pieceMami;
-                    target = validFirstKills[movements[mi].rv].targetMami;
-                }else if(movements[mi].action == 'fightBack' || movements[mi].action == 'normalKill'){
-                    console.log('AI decide to fightBack or normalKill.');//******
-                    piece = validMovements[movements[mi].rv].pieceMami;
-                    target = validMovements[movements[mi].rv].targetMami;
+                if(tmpWeight < 100){
+                    if(movements[mi].action == 'escape'){
+                        console.log('AI decide to escape.');//******
+                        piece = validEscapes[movements[mi].rv].pieceMami;
+                        target = validEscapes[movements[mi].rv].targetMami;
+                    }else if(movements[mi].action == 'firstKill'){
+                        console.log('AI decide to firstKill.');//******
+                        piece = validFirstKills[movements[mi].rv].pieceMami;
+                        target = validFirstKills[movements[mi].rv].targetMami;
+                    }else if(movements[mi].action == 'fightBack' || movements[mi].action == 'normalKill'){
+                        console.log('AI decide to fightBack or normalKill.');//******
+                        piece = validMovements[movements[mi].rv].pieceMami;
+                        target = validMovements[movements[mi].rv].targetMami;
+                    }
+    
+                    if(this.superJiang&&piece.name == '将'){
+                        console.log('AI:start to change the step method for jiang.');//******
+                        this.superJiang = false;
+                        piece.canMoveTo = jiangNormal;
+                        piece.weight = 6;
+                    }
+    
+                    console.log('电脑的' + this.camp+piece.name + ' KO ' +target.camp+target.name);//*******
+                    piece.moveTo(target);
+                    resp.json({
+                        action:'kill',
+                        killer:piece,
+                        killed:target
+                    });
+                    return;
                 }
-
-                if(this.superJiang&&piece.name == '将'){
-                    console.log('AI:start to change the step method for jiang.');//******
-                    this.superJiang = false;
-                    piece.canMoveTo = jiangNormal;
-                    piece.weight = 6;
-                }
-
-                console.log('电脑的' + this.camp+piece.name + ' KO ' +target.camp+target.name);//*******
-                piece.moveTo(target);
-                resp.json({
-                    action:'kill',
-                    killer:piece,
-                    killed:target
-                });
-                return;
+                
             }//for valid movements
         }
 
