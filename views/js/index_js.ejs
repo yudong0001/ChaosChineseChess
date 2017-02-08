@@ -15,14 +15,14 @@ $(document).ready(function(){
     //var pageWidth = parseFloat(document.body.scrollWidth;
     var boardWidth = parseFloat($('#board').css('width'));
     console.log('board width:'+boardWidth);//******
-    var cellSize = boardWidth/9-2;
-    var cellDSize = boardWidth/16-2;
+    var cellSize = parseInt(boardWidth/9-2);
+    var cellDSize = parseInt(boardWidth/16-2);
     console.log('cell-size:'+cellSize);//******
     $('#board').css('height',(cellSize+2)*rowsCount);
     $('.cell').css('width',cellSize).css('height',cellSize);
     $('#divDeads').css('height',(cellDSize+2)*2);
     $('.cellDead').css('width',cellDSize).css('height',cellDSize);
-    var bgMargin = parseFloat($('.cell').css('width'))/2*0.7;
+    var bgMargin = cellSize/2*0.7;
     $('#board').css('background-position-x', bgMargin);
     $('#board').css('background-position-y', bgMargin);
     $('.action1').css('height',parseFloat($('.action1').css('width')));
@@ -91,37 +91,50 @@ $(document).ready(function(){
     $('#Restart').click(function(e){
         window.location.reload();
     });
+    $('#divAway').click(function(e){
+        window.location.reload();
+    });
+    $('#divPeace').click(function(e){
+        window.location.reload();
+    });
+    $('#divSet').click(function(){
+        $('.buttons').toggle();
+    });
 
     $('#AI').click(function(e){
         playMode = 'humanAI';
-        $('#AI').addClass('selected');
-        $('#AI').hide();
-        $('#Human').hide();
-    });
+        $('.modeButton').removeClass('playerBorder');
+        $('#AI').addClass('playerBorder');
+        setTimeout(function(){
+            $('.buttons').hide();
+        }, 2000);
+    });//set AI mode
 
     $('#Human').click(function(e){
         playMode = 'human';
-        $('#Human').addClass('selected');
-        $('#AI').hide();
-        $('#Human').hide();
+        $('.modeButton').removeClass('playerBorder');
+        $('#Human').addClass('playerBorder');
+        setTimeout(function(){
+            $('.buttons').hide();
+        }, 2000);
         $('#player2').text('HUMAN');
         console.log('human mode clicked.playmode='+playMode);//*******
-    });
+    });//set human mode
 
     $('.cell').click(function(e){
         console.log('cell click called: %o',e);//***************
         if(!$('#AI').hasClass('selected')&&!$('#Human').hasClass('selected')){
             $('#AI').trigger('click');
-        }
+        }//set default mode to 'AI'
 
         var clicked = $(e.currentTarget);
         var cellPos = getCellFromMami(clicked);
-        var wTime = 50;
+        var wTime = 50;//normal interactive interval
         console.log('enemy in loc1:'+enemy);//************
         console.log('playMode: '+playMode);//********
 
         $.post('/play',{ playMode:playMode ,player:enemy?"enemy":"human" ,x:cellPos.x, y:cellPos.y }, function(data){
-            console.log('resp data from server: %o',data);
+            console.log('resp data from server: %o',data);//******
             switch (data.action){
                 case 'discover':
                     updateCell(data.cell);
@@ -142,7 +155,7 @@ $(document).ready(function(){
                     $('#cell'+data.killed.y+data.killed.x).addClass('killed');
                     if(playMode == 'humanAI'&&enemy){
                         wTime = 500;
-                    }
+                    }//set interactive interval for AI
                     setTimeout(function(){
                         updateCell(data.killer);
                         updateCell(data.killed);
@@ -161,11 +174,15 @@ $(document).ready(function(){
                         console.log('trig AI');//**********
                         trigAI();
                     }
-                    $('.player').removeClass('playerBorder');
-                    $('#player2').addClass('playerBorder');
+                    // $('.player').removeClass('playerBorder');
+                    // $('#player2').addClass('playerBorder');
+                    $('.player').hide();
+                    $('#player2').show();
                 }else{
-                    $('.player').removeClass('playerBorder');
-                    $('#player1').addClass('playerBorder');
+                    // $('.player').removeClass('playerBorder');
+                    // $('#player1').addClass('playerBorder');
+                    $('.player').hide();
+                    $('#player1').show();
                 }
             }, wTime);
             

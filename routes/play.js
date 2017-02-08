@@ -19,6 +19,32 @@ function isSame(piece1, piece2){
     return (piece1.x == piece2.x && piece1.y == piece2.y);
 }
 
+function isInside(piece1,piece2,piece3){
+    return !(piece1.x==piece2.x&&piece2.x==piece3.x || piece1.y==piece2.y&&piece2.y==piece3.y);
+    var minPiece = piece2,maxPiece = piece3;
+    var result = false;
+    if(minPiece.x==maxPiece.x){
+        if(minPiece.y>maxPiece.y){
+            var tmpPiece = minPiece;
+            minPiece = maxPiece;
+            maxPiece = tmpPiece;
+        }
+        if(piece1.y>minPiece.y&&piece1.y<maxPiece.y){
+            result = true;
+        }
+    }else{
+        if(minPiece.x>maxPiece.x){
+            var tmpPiece = minPiece;
+            minPiece = maxPiece;
+            maxPiece = tmpPiece;
+        }
+        if(piece1.x>minPiece.x&&piece1.x<maxPiece.x){
+            result = true;
+        }
+    }
+    return result;
+}
+
 function AIPlayer(){
     this.camp = undefined;
     this.superJiang = true;
@@ -127,7 +153,8 @@ function AIPlayer(){
                 if(candidatesOpp.length>0){
                     freeWalk[i].targetMami.camp = 'gray';
                     for(var j=0;j<candidatesOpp.length;j++){
-                        if(candidatesOpp[j].name=='炮' && candidatesOpp[j].canMoveTo(freeWalk[i].targetMami, board)){
+                        if(candidatesOpp[j].name=='炮' && candidatesOpp[j].canMoveTo(freeWalk[i].targetMami, board) 
+                            && !isInside(freeWalk[i].pieceMami, candidatesOpp[j], freeWalk[i].targetMami)){
                             freeWalk[i].danger = true;
                         }
                     }

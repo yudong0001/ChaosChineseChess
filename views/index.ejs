@@ -16,15 +16,14 @@ var cellSize = '38px';
   <body>
     <!-- <h1><%= title %></h1> -->
     <!-- <p>欢迎赏玩<%= title %></p> -->
-    <div class="buttons">
-      <input class='button' type='button' id='AI' value='人机对战' />
-      <input class='button' type='button' id='Human' value='双人对战' />
-      <input class='button' type='button' id='Restart' value='再来一盘' />
+    <div class="buttons" style="display: none;">
+      <input class='modeButton playerBorder' type='button' id='AI' value='人机对战' />
+      <input class='modeButton' type='button' id='Human' value='双人对战' />
     </div>
-    <div class='players'>
+    <!-- <div class='players'>
       <div id='player1' class ='player playerBorder '>HUMAN</div>
       <div id='player2' class='player '>AI</div>
-    </div>
+    </div> -->
     
     <div id="mainPart">
     	<div id="divMLeft">
@@ -52,7 +51,11 @@ var cellSize = '38px';
     		</div>
     	</div>
     	<div id="divMRight">
-    		<div id="divCurrCamp">当前：<div id="currCamp" class="inlineDiv">Player1</div></div>
+    		<div id="divCurrCamp">当前：
+    			<!-- <div id="currCamp" class="inlineDiv">Player1</div> -->
+    			<div id='player1' class ='player inlineDiv'>HUMAN</div>
+      			<div id='player2' class='player inlineDiv' style='display: none;'>AI</div>
+    		</div>
     		<div id="divAway" class="action1"></div>
     		<div id="divPeace" class="action1"></div>
     		<div id="divSet" class="action2"></div>
