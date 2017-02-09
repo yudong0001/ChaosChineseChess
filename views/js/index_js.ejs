@@ -66,9 +66,11 @@ $(document).ready(function(){
             jqMami.addClass('discovered');
         }
         if (cell.name == EMPTY_NAME) {
-            jqMami.removeClass('red black selected killed').css('background-image', '');
+            //jqMami.removeClass('red black selected killed').css('background-image', '');//actually
+            jqMami.removeClass('red black selected killed').text('');//for development test
         } else {
-            jqMami.removeClass('red black selected killed').css('background-image', 'url(/image/'+cell.camp+'-'+cell.fname+'.png)');
+            //jqMami.removeClass('red black selected killed').css('background-image', 'url(/image/'+cell.camp+'-'+cell.fname+'.png)');//actually
+            jqMami.removeClass('red black selected killed').addClass(' '+cell.camp).text(cell.name);//for development test
         }
     }
 

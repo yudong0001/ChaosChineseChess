@@ -110,7 +110,6 @@ function AIPlayer(){
                 for(var j=1;j<candidatesOpp.length;j++){
                     if(candidatesOpp[j].canMoveTo(candidatesOpp[i], board)){
                         candidatesOpp[i].isCovered = true;
-                        break;
                     }
                 }
             }
