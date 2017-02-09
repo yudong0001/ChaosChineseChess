@@ -156,6 +156,11 @@ function AIPlayer(){
                             && !isInside(freeWalk[i].pieceMami, candidatesOpp[j], freeWalk[i].targetMami)){
                             freeWalk[i].danger = true;
                         }
+                        if(candidatesOpp[j].name=='炮'){
+                            console.log('set danger flag for freeWalk[i] of 炮:canMoveTo:'+candidatesOpp[j].canMoveTo(freeWalk[i].targetMami, board));//*******
+                            console.log('set danger flag for freeWalk[i] of 炮:isInside:'+isInside(freeWalk[i].pieceMami, candidatesOpp[j], freeWalk[i].targetMami));//******
+                            console.log('set danger flag for freeWalk[i] of 炮:freeWalk[i]:%o',freeWalk[i]);//******
+                        }
                     }
                     freeWalk[i].targetMami.camp = undefined;
                 }//for enemy '炮'
@@ -182,9 +187,9 @@ function AIPlayer(){
             }
         }//set danger flag for freeWalk
 
-        // if(freeWalk.length>0){
-        //     console.log('AI.freeWalk: %o',freeWalk);//******
-        // }
+        if(freeWalk.length>0){
+            console.log('AI.freeWalk: %o',freeWalk);//******
+        }
 
         if (validMovements.length > 0 || freeWalk.length > 0) {
             var validFirstKills = new Array;
@@ -305,7 +310,7 @@ function AIPlayer(){
                     }
                     //console.log('AI.play.validMovements:target.weight:'+target.weight);//*******
                 }
-                console.log('AI will do normal kill');//******
+                console.log('for AI normal kill');//******
                 // piece = validMovements[rv].pieceMami;
                 // target = validMovements[rv].targetMami;
             }//for normal kill

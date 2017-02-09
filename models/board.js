@@ -76,7 +76,7 @@ function obstaclesCountOnStraightLine(p1, p2, cboard) {
             lowLimit = p1.y;
         }
         for (var i = lowLimit + 1; i < upLimit; i++) {
-            if (cboard[i][p1.x].name != EMPTY_NAME) {
+            if (cboard[i][p1.x].camp != undefined) {
                 //console.log('board.obstacles.cboard[i][p1.x]:%o',cboard[i][p1.x]);//*******
                 count++;
             }
@@ -89,7 +89,7 @@ function obstaclesCountOnStraightLine(p1, p2, cboard) {
             lowLimit = p1.x;
         }
         for (var i = lowLimit + 1; i < upLimit; i++) {
-            if (cboard[p1.y][i].name != EMPTY_NAME) {
+            if (cboard[p1.y][i].camp != undefined) {
                 //console.log('board.obstacles.cboard[p1.y][i]:%o',cboard[p1.y][i]);//*******
                 count++;
             }
