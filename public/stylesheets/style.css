@@ -79,7 +79,7 @@ a {
   width:100%;
   background-image: url(/image/p169v2.png);
   background-repeat: no-repeat;
-  background-size: 92.8%;
+  background-size: 91.8%;
   /*background-position: 11px 11px;*/
 }
 
@@ -93,13 +93,13 @@ a {
   background-size: 80%;
   background-repeat: no-repeat;
   background-position: 50%;
+  font-size: xx-large;
   /*background-color: #eee;*/
 }
 .discovered.cell {
   font-weight: bold;
   background-image: none;
   text-align: center;
-  line-height: 50px;
 }
 .red.cell {
   color: red;
@@ -155,4 +155,13 @@ a {
   background-image: url(/image/bgShare.png);
   margin-bottom: 0;
   margin-top: 0;
+}
+
+@media screen and (min-width: 1001px){
+  body{
+    font-size: large;
+  }
+  .cell{
+    font-size: x-large;
+  }
 }

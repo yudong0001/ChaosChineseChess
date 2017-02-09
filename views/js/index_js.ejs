@@ -20,6 +20,7 @@ $(document).ready(function(){
     console.log('cell-size:'+cellSize);//******
     $('#board').css('height',(cellSize+2)*rowsCount);
     $('.cell').css('width',cellSize).css('height',cellSize);
+    $('.cell').css('line-height',cellSize+'px');
     $('#divDeads').css('height',(cellDSize+2)*2);
     $('.cellDead').css('width',cellDSize).css('height',cellDSize);
     var bgMargin = cellSize/2*0.7;
