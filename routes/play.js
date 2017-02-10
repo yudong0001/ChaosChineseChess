@@ -20,7 +20,9 @@ function isSame(piece1, piece2){
 }
 
 function isInside(piece1,piece2,piece3){
-    return !(piece1.x==piece2.x&&piece2.x==piece3.x || piece1.y==piece2.y&&piece2.y==piece3.y);
+    if(!(piece1.x==piece2.x&&piece2.x==piece3.x || piece1.y==piece2.y&&piece2.y==piece3.y)){
+        return false;
+    } ;
     var minPiece = piece2,maxPiece = piece3;
     var result = false;
     if(minPiece.x==maxPiece.x){
@@ -353,7 +355,7 @@ function AIPlayer(){
                             console.log('normalKill.validMovements: %o', validMovements[movements[c].rv]);//*******
                         }
                     }
-                    if( validMovements[movements[mi].rv].targetMami.isCovered 
+                    if( tmpWeight < 100 &&validMovements[movements[mi].rv].targetMami.isCovered 
                         && validMovements[movements[mi].rv].targetMami.weight>=validMovements[movements[mi].rv].pieceMami.weight ){
                         tmpWeight = 100;
                     }
