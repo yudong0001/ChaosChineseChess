@@ -396,7 +396,8 @@ function AIPlayer(){
             }//for valid movements
         }
 
-        // 走动失败，随机（或有选择的，依据难度不同）翻开棋子。
+        // 走动失败，随机（或有选择的，依据难度不同）翻开棋子或freeWalk。
+        
         var undiscovered = [];
         console.log('start discovering by AI.');//************
 
@@ -409,19 +410,24 @@ function AIPlayer(){
             }
         }
         console.log('ai.undiscovered length: '+undiscovered.length);//***********
-
-        if (undiscovered.length > 0) {
-            console.log('start to discover a cell by AI.');//**********
-            var toBeDiscovered = undiscovered[randomInt(undiscovered.length-1)];
-            console.log('电脑翻开了 ' + toBeDiscovered.camp + ' ' + toBeDiscovered.name);//*******
-            toBeDiscovered.hidden = false;
-            resp.json({
-                action:'discover',
-                cell:toBeDiscovered
-            });
-            return;
+    
+        var doDiscover = false;
+        if(undiscovered.length > 0 && (freeWalk.length==0 || randomInt(9)<6)){
+            doDiscover = true;
         }
-
+        if(doDiscover){
+            if (undiscovered.length > 0) {
+                console.log('start to discover a cell by AI.');//**********
+                var toBeDiscovered = undiscovered[randomInt(undiscovered.length-1)];
+                console.log('电脑翻开了 ' + toBeDiscovered.camp + ' ' + toBeDiscovered.name);//*******
+                toBeDiscovered.hidden = false;
+                resp.json({
+                    action:'discover',
+                    cell:toBeDiscovered
+                });
+                return;
+            }
+        }
         // 无可用下一步，则检测是否输局或 Pass 一步。
         var restPieces = [];
         var restEnemies = camper.getEnemy(this.camp);
@@ -488,7 +494,6 @@ function AIPlayer(){
             resp.json({
             	action:'pass',
             });
-            
             
         }
     };
