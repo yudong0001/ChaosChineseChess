@@ -109,13 +109,15 @@ function AIPlayer(){
                 }
             }
             if(candidatesOpp.length>1){
-                for(var j=1;j<candidatesOpp.length;j++){
-                    if(candidatesOpp[j].canMoveTo(candidatesOpp[i], board)){
+                for(var j=0;j<candidatesOpp.length;j++){
+                    if(i!=j&&candidatesOpp[j].canMoveTo(candidatesOpp[i], board)){
                         candidatesOpp[i].isCovered = true;
                     }
                 }
             }
         }//for killOpp
+
+        console.log('check ai.candidatesOpp.isCovered: %o',candidatesOpp);//*******
 
         for (var i = 0; i < candidatesOpp.length; i++) {
             var candCell = candidatesOpp[i];
@@ -158,11 +160,11 @@ function AIPlayer(){
                             && !isInside(freeWalk[i].pieceMami, candidatesOpp[j], freeWalk[i].targetMami)){
                             freeWalk[i].danger = true;
                         }
-                        if(candidatesOpp[j].name=='炮'){
-                            console.log('set danger flag for freeWalk[i] of 炮:canMoveTo:'+candidatesOpp[j].canMoveTo(freeWalk[i].targetMami, board));//*******
-                            console.log('set danger flag for freeWalk[i] of 炮:isInside:'+isInside(freeWalk[i].pieceMami, candidatesOpp[j], freeWalk[i].targetMami));//******
-                            console.log('set danger flag for freeWalk[i] of 炮:freeWalk[i]:%o',freeWalk[i]);//******
-                        }
+                        // if(candidatesOpp[j].name=='炮'){
+                        //     console.log('set danger flag for freeWalk[i] of 炮:canMoveTo:'+candidatesOpp[j].canMoveTo(freeWalk[i].targetMami, board));//*******
+                        //     console.log('set danger flag for freeWalk[i] of 炮:isInside:'+isInside(freeWalk[i].pieceMami, candidatesOpp[j], freeWalk[i].targetMami));//******
+                        //     console.log('set danger flag for freeWalk[i] of 炮:freeWalk[i]:%o',freeWalk[i]);//******
+                        // }
                     }
                     freeWalk[i].targetMami.camp = undefined;
                 }//for enemy '炮'
@@ -177,6 +179,8 @@ function AIPlayer(){
                                     && validMovementsOpp[jj].pieceMami.y == freeWalk[i].targetMami.y) ){
                                         freeWalk[i].danger = true;
                                 }
+                                console.log('check freeWalk.danger while catched by JuPaoJiang:%o',validMovementsOpp[jj]);//******
+                                console.log('check freeWalk.danger while catched by JuPaoJiang:%o',freeWalk[i]);//******
                                 // if( validMovementsOpp[jj].pieceMami.name == '车' 
                                 //     && (freeWalk[i].pieceMami.name == '士' || freeWalk[i].pieceMami.name == '相' || freeWalk[i].pieceMami.name == '马')
                                 //     && (validMovementsOpp[jj].pieceMami.x == freeWalk[i].targetMami.x
@@ -189,9 +193,9 @@ function AIPlayer(){
             }
         }//set danger flag for freeWalk
 
-        if(freeWalk.length>0){
-            console.log('AI.freeWalk: %o',freeWalk);//******
-        }
+        // if(freeWalk.length>0){
+        //     console.log('AI.freeWalk: %o',freeWalk);//******
+        // }
 
         if (validMovements.length > 0 || freeWalk.length > 0) {
             var validFirstKills = new Array;
