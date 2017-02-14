@@ -15,10 +15,12 @@ function randomInt(max){
     return rvalue;
 }
 
+//to judge if the position is same of piece1 and piece2
 function isSame(piece1, piece2){
     return (piece1.x == piece2.x && piece1.y == piece2.y);
 }
 
+// to ensure if piece1 is between piece2 and piece3
 function isInside(piece1,piece2,piece3){
     if(!(piece1.x==piece2.x&&piece2.x==piece3.x || piece1.y==piece2.y&&piece2.y==piece3.y)){
         return false;
@@ -179,8 +181,8 @@ function AIPlayer(){
                                     && validMovementsOpp[jj].pieceMami.y == freeWalk[i].targetMami.y) ){
                                         freeWalk[i].danger = true;
                                 }
-                                console.log('check freeWalk.danger while catched by JuPaoJiang:%o',validMovementsOpp[jj]);//******
-                                console.log('check freeWalk.danger while catched by JuPaoJiang:%o',freeWalk[i]);//******
+                                console.log('check freeWalk.danger while catched by JuPaoJiang,validMovementsOpp[jj]:%o',validMovementsOpp[jj]);//******
+                                console.log('check freeWalk.danger while catched by JuPaoJiang,freeWalk[i]:%o',freeWalk[i]);//******
                                 // if( validMovementsOpp[jj].pieceMami.name == '车' 
                                 //     && (freeWalk[i].pieceMami.name == '士' || freeWalk[i].pieceMami.name == '相' || freeWalk[i].pieceMami.name == '马')
                                 //     && (validMovementsOpp[jj].pieceMami.x == freeWalk[i].targetMami.x
