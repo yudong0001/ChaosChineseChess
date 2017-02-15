@@ -157,6 +157,26 @@ a {
   margin-top: 0;
 }
 
+#divFinished{
+  position: absolute;
+  background: #FFFFFF;
+  opacity: .8;
+  text-align: center;
+  padding-top: 10%;
+  font-size: xx-large;
+}
+#txtRefresh{
+  
+}
+#btnRefresh{
+  border-bottom: 1px solid #111;
+  border-top: 1px solid #111;
+  border-radius: 10%;
+  width: 19%;
+  padding: 1%;
+  margin: 5% 39%;
+}
+
 @media screen and (min-width: 1001px){
   body{
     font-size: large;

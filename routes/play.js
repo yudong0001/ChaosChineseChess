@@ -8,6 +8,8 @@ var jiangNormal = function(piece, cboard){
 }
 
 var EMPTY_NAME = '空';
+var BLACK = 'black';
+var RED = 'red';
 
 function randomInt(max){
     var rvalue = Math.round( Math.random()*max );
@@ -49,6 +51,28 @@ function isInside(piece1,piece2,piece3){
     return result;
 }
 
+function getEnemysNumber(ccamp,board){
+    var cboard = board;
+    var ocamp = BLACK;
+    var number = 0;
+    if(ccamp == BLACK){
+        ocamp = RED;
+    }
+
+    console.log('getEnemysNumber.board.length:'+cboard.length);//******
+    console.log('getEnemysNumber.board[].length:'+cboard[0].length);//******
+    for (var i=0;i<cboard.length;i++){
+        for(var j=0;j<cboard[0].length;j++){
+            if(cboard[i][j].camp == ocamp){
+                number++;   
+            }
+        }
+    }
+    //console.log('getEnemysNumber.board:%o',cboard);//*****
+    console.log('getEnemysNumber.return:'+number);//******
+    return number;
+}
+
 function AIPlayer(){
     this.camp = undefined;
     this.superJiang = true;
@@ -75,6 +99,9 @@ function AIPlayer(){
         var validMovementsOpp = [];
         var freeWalk = [];
         var freeWalkOpp = [];
+        var undiscovered = [];
+        var restPieces = [];
+        var restEnemies = 0;
 
         console.log('entr AIPlayer.play ,board[0][0] is: %o' +board[0][0].camp+':'+board[0][0].name);//***********
 
@@ -390,12 +417,23 @@ function AIPlayer(){
                     }
     
                     console.log('电脑的' + this.camp+piece.name + ' KO ' +target.camp+target.name);//*******
+                    
                     piece.moveTo(target);
-                    resp.json({
-                        action:'kill',
-                        killer:piece,
-                        killed:target
-                    });
+                    restEnemies = getEnemysNumber(this.camp,board);
+                    console.log('AI.restEnemiesNumber:'+restEnemies);//******
+                    if(restEnemies==0){
+                        console.log('Human 输了！');//*******
+                        resp.json({
+                            action:'finished',
+                            who:'Human'
+                        });
+                    }else{
+                        resp.json({
+                            action:'kill',
+                            killer:piece,
+                            killed:target
+                        });
+                    }
                     return;
                 }
                 
@@ -404,9 +442,8 @@ function AIPlayer(){
 
         // 走动失败，随机（或有选择的，依据难度不同）翻开棋子或freeWalk。
         
-        var undiscovered = [];
-        console.log('start discovering by AI.');//************
 
+        console.log('start discovering by AI.');//************
         count1=count2=0;
         for (var i = rangeY - 1; i >= 0; i--) {
             for(var j=0;j<rangeX;j++){
@@ -415,7 +452,7 @@ function AIPlayer(){
                 }
             }
         }
-        console.log('ai.undiscovered length: '+undiscovered.length);//***********
+        console.log('check ai.undiscovered length: '+undiscovered.length);//***********
     
         var doDiscover = false;
         if(undiscovered.length > 0 && (freeWalk.length==0 || randomInt(9)<6)){
@@ -435,8 +472,8 @@ function AIPlayer(){
             }
         }
         // 无可用下一步，则检测是否输局或 Pass 一步。
-        var restPieces = [];
-        var restEnemies = camper.getEnemy(this.camp);
+        
+        restEnemies = getEnemysNumber(this.camp,board);
         count1=count2=0;
         for (var i = rangeY - 1; i >= 0; i--) {
             for(var j=0;j<rangeX;j++){
@@ -447,15 +484,17 @@ function AIPlayer(){
             }
         }
 
-        if (restPieces.length == 0 && restEnemies.length > 0) {
+        if (restPieces.length == 0 && restEnemies > 0) {
             console.log('电脑认输');//*******
             resp.json({
                 action:'finished',
+                who:'AI'
             });
-        } else if (restPieces.length > 0 && restEnemies.length == 0){
+        } else if (restPieces.length > 0 && restEnemies == 0){
             console.log('Human 输了！');//*******
             resp.json({
                 action:'finished',
+                who:'Human'
             });
         }else {
             console.log('电脑 freeWalk');//*******

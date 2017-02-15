@@ -28,6 +28,8 @@ $(document).ready(function(){
     $('#board').css('background-position-y', bgMargin);
     $('.action1').css('height',parseFloat($('.action1').css('width')));
     $('.action2').css('height',parseFloat($('.action2').css('width'))/2);
+    $('#divFinished').css('width',$('#mainPart').css('width')).css('height',$('#mainPart').css('height')).hide();
+    $('#btnRefresh').text('OK');
 
     function getCellFromMami(jqMami) {
         // var x = jqMami.css('left');
@@ -103,6 +105,9 @@ $(document).ready(function(){
     $('#divSet').click(function(){
         $('.buttons').toggle();
     });
+    $('#divFinished').click(function(e){
+        window.location.reload();
+    });
 
     $('#AI').click(function(e){
         playMode = 'humanAI';
@@ -165,8 +170,8 @@ $(document).ready(function(){
                         enemy = !enemy;
                     }, wTime);
                     break;
-                case 'finished':enemy = false;break;
-                case 'pass':enemy = false;break;
+                case 'finished':enemy = false;$('#divFinished').show();$('#txtRefresh').text(data.who=='Human'?'YOU LOSE! : (':'YOU WIN! : )');break;
+                case 'pass':enemy = false;
             }
             //updateBoard();
             console.log('enemy after post: '+ enemy);//**********
